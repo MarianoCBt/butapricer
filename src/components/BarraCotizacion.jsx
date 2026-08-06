@@ -1,18 +1,37 @@
 import { ars, fechaCorta, numero } from '../utils/format'
+import { CASA_MANUAL } from '../data/cotizacion'
 
 /**
  * Barra con la cotización del día. El usuario elige QUÉ dólar usar para
- * convertir a pesos (blue, oficial, tarjeta…) y de ahí sale todo lo demás.
+ * convertir a pesos y de ahí sale todo lo demás.
+ *
+ * Además de las casas reales (blue, oficial, tarjeta…) está el **AVG
+ * propio**: el valor al que uno cobra el dólar, que en la práctica no es
+ * ninguna cotización de mercado sino una decisión de precio (hay quien
+ * vende a $2.000 con el blue a $1.530). Se carga a mano y se muestra al
+ * lado cuánto es de recargo sobre el blue, para que el número no quede
+ * suelto.
  */
 export default function BarraCotizacion({
   cotizacion,
   casaId,
   setCasaId,
   casa,
+  esManual,
+  dolarManual,
+  setDolarManual,
+  referencia,
+  tasaArs,
   cargando,
   onRefrescar,
 }) {
   const casas = cotizacion?.casas || []
+
+  // Cuánto se está cobrando por encima (o por debajo) del blue.
+  const recargo =
+    referencia?.venta > 0 && tasaArs > 0
+      ? (tasaArs / referencia.venta - 1) * 100
+      : null
 
   return (
     <div className="border-b border-[var(--color-border)] bg-[var(--color-surface-2)]">
@@ -30,15 +49,46 @@ export default function BarraCotizacion({
                 {c.nombre}
               </option>
             ))}
+            <option value={CASA_MANUAL}>Mi AVG (a mano)</option>
           </select>
         </label>
 
-        <span className="tabular font-semibold text-[var(--color-ink)]">
-          {casa?.venta ? ars(casa.venta) : '—'}
-          <span className="ml-1 text-xs font-normal text-[var(--color-faint)]">
-            venta
+        {esManual ? (
+          <label className="flex items-center gap-2">
+            <span className="text-[var(--color-muted)]">$</span>
+            <input
+              type="number"
+              min={0}
+              step={10}
+              value={dolarManual || ''}
+              onChange={(e) => setDolarManual(Number(e.target.value))}
+              placeholder="2000"
+              aria-label="Valor del dólar con el que tasás"
+              className="tabular w-24 rounded-md border border-[var(--color-brand)] bg-[var(--color-surface)] px-2 py-1 font-semibold text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-brand-ink)]"
+            />
+          </label>
+        ) : (
+          <span className="tabular font-semibold text-[var(--color-ink)]">
+            {casa?.venta ? ars(casa.venta) : '—'}
+            <span className="ml-1 text-xs font-normal text-[var(--color-muted)]">
+              venta
+            </span>
           </span>
-        </span>
+        )}
+
+        {recargo !== null && Math.abs(recargo) >= 0.5 && (
+          <span
+            className="tabular rounded-full px-2 py-0.5 text-xs"
+            style={{
+              color: recargo > 0 ? 'var(--color-brand-ink)' : 'var(--color-muted)',
+              backgroundColor: 'color-mix(in srgb, currentColor 15%, transparent)',
+            }}
+            title={`Blue: ${ars(referencia.venta)}`}
+          >
+            {recargo > 0 ? '+' : ''}
+            {numero(recargo, 1)}% vs blue
+          </span>
+        )}
 
         <span className="tabular text-[var(--color-muted)]">
           1 € ={' '}

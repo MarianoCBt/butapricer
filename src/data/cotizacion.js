@@ -101,8 +101,12 @@ export function leerCache() {
   }
 }
 
+// Id reservado para el dólar cargado a mano ("mi AVG"): no viene de la API,
+// lo pone el usuario. Ver BarraCotizacion.
+export const CASA_MANUAL = 'manual'
+
 /** Busca una casa por id, con la primera como respaldo. */
 export function casaPorId(cotizacion, id) {
-  if (!cotizacion?.casas?.length) return null
+  if (!cotizacion?.casas?.length || id === CASA_MANUAL) return null
   return cotizacion.casas.find((c) => c.id === id) || cotizacion.casas[0]
 }

@@ -6,7 +6,7 @@ import {
   claveImpresion,
   resolverConsulta,
 } from './data/ygoprodeck'
-import { casaPorId, leerCache, traerCotizacion } from './data/cotizacion'
+import { CASA_MANUAL, casaPorId, leerCache, traerCotizacion } from './data/cotizacion'
 import {
   buscarImpresiones,
   emparejarImpresion,
@@ -81,9 +81,29 @@ export default function App() {
     localStorage.setItem('buta.pricer.casa', casaId)
   }, [casaId])
 
+  // "Mi AVG": el dólar al que uno decide cobrar, cargado a mano. No es una
+  // cotización, es una decisión de precio, así que va aparte de las casas.
+  const [dolarManual, setDolarManual] = useState(
+    () => Number(localStorage.getItem('buta.pricer.dolarManual')) || 0,
+  )
+  useEffect(() => {
+    localStorage.setItem('buta.pricer.dolarManual', String(dolarManual))
+  }, [dolarManual])
+
+  const esManual = casaId === CASA_MANUAL
   const casa = casaPorId(cotizacion, casaId)
-  const tasaArs = casa?.venta || 0
+  const blue = casaPorId(cotizacion, 'blue')
+  const tasaArs = esManual ? dolarManual : casa?.venta || 0
   const eurUsd = cotizacion?.eurUsd || 0
+
+  // Al pasar a manual por primera vez, arrancamos desde el valor que estaba
+  // a la vista en vez de dejar el campo en cero (y toda la app en "—").
+  const elegirCasa = (id) => {
+    if (id === CASA_MANUAL && !dolarManual) {
+      setDolarManual(Math.round(casa?.venta || blue?.venta || 0))
+    }
+    setCasaId(id)
+  }
 
   // ---- Carta ------------------------------------------------------
   const [carta, setCarta] = useState(null)
@@ -140,18 +160,22 @@ export default function App() {
   )
 
   // ---- Impresión elegida ------------------------------------------
-  const impresion = useMemo(() => {
-    const encontrada = buscarImpresion(carta, claveHash)
-    if (!encontrada) return null
-    return { ...encontrada, ars: encontrada.precioUsd * tasaArs }
-  }, [carta, claveHash, tasaArs])
+  // OJO: esto NO puede depender de `tasaArs`. Si depende, cambiar la
+  // cotización recrea el objeto, lo que reinicia los efectos de TCGPlayer y
+  // borra las ventas ya traídas sin volver a pedirlas (el productId no
+  // cambió, así que su efecto no se vuelve a disparar). La conversión a
+  // pesos la hace cada componente, que ya recibe `tasaArs`.
+  const impresion = useMemo(
+    () => buscarImpresion(carta, claveHash),
+    [carta, claveHash],
+  )
 
   const cambiarImpresion = (clave) => irACarta(carta.id, clave || null)
 
   // ---- TCGPlayer: precios por rareza + ventas reales ---------------
   // Va por un proxy (dev: Vite; publicado: Worker). Si no hay proxy todo
   // esto queda vacío y la app sigue andando con YGOPRODeck.
-  const [impresionesTcg, setImpresionesTcg] = useState([])
+  const [impresionesTcg, setImpresionesTcg] = useState(null) // null = cargando
   const [productoTcg, setProductoTcg] = useState(null)
   const [ventas, setVentas] = useState([])
   const [cargandoTcg, setCargandoTcg] = useState(false)
@@ -160,7 +184,7 @@ export default function App() {
   // Todas las impresiones de la carta en TCGPlayer (una sola vez por carta).
   useEffect(() => {
     let vigente = true
-    setImpresionesTcg([])
+    setImpresionesTcg(null)
     if (!carta?.nombre) return
     buscarImpresiones(carta.nombre).then((r) => vigente && setImpresionesTcg(r))
     return () => {
@@ -169,11 +193,18 @@ export default function App() {
   }, [carta?.nombre])
 
   // La impresión elegida -> su producto puntual en TCGPlayer.
+  // Espera a que la lista esté cargada (`null` = todavía viene en camino):
+  // si no, empareja contra una lista vacía y dispara una búsqueda por código
+  // al pedazo, para después rehacer todo cuando llega la lista.
   useEffect(() => {
     let vigente = true
-    setProductoTcg(null)
-    setVentas([])
-    if (!impresion) return
+    if (!impresion || impresionesTcg === null) {
+      setProductoTcg(null)
+      // Mientras viene la lista seguimos "cargando", así no se muestra
+      // "no encontré esta impresión" antes de haber buscado.
+      setCargandoTcg(Boolean(impresion))
+      return
+    }
     setCargandoTcg(true)
     emparejarImpresion(impresion, impresionesTcg, carta?.nombre).then((p) => {
       if (!vigente) return
@@ -186,12 +217,18 @@ export default function App() {
   }, [impresion, impresionesTcg, carta?.nombre])
 
   // Y de ese producto, sus últimas ventas cerradas.
+  // Este efecto es el ÚNICO dueño de `ventas`: si otro efecto la limpiaba y
+  // después volvía a dejar el mismo productId, acá no se disparaba nada y la
+  // lista quedaba vacía para siempre.
   useEffect(() => {
     let vigente = true
-    setVentas([])
-    if (!productoTcg?.productId) return
+    const id = productoTcg?.productId
+    if (!id) {
+      setVentas([])
+      return
+    }
     setCargandoVentas(true)
-    traerVentas(productoTcg.productId).then((v) => {
+    traerVentas(id).then((v) => {
       if (!vigente) return
       setCargandoVentas(false)
       setVentas(v)
@@ -243,8 +280,13 @@ export default function App() {
         <BarraCotizacion
           cotizacion={cotizacion}
           casaId={casaId}
-          setCasaId={setCasaId}
+          setCasaId={elegirCasa}
           casa={casa}
+          esManual={esManual}
+          dolarManual={dolarManual}
+          setDolarManual={setDolarManual}
+          referencia={blue}
+          tasaArs={tasaArs}
           cargando={cargandoCotiz}
           onRefrescar={refrescarCotizacion}
         />
