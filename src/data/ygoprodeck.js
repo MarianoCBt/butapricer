@@ -1,16 +1,16 @@
 // =====================================================================
-//  YGOPRODeck — identificación de cartas y precios de referencia.
+//  YGOPRODeck — identifica la carta y sus impresiones.
 //
-//  Es la única fuente de precios de la app. Devuelve, para cada carta:
-//   - `card_prices`: el MENOR precio encontrado en cada página
-//     (TCGPlayer / CardMarket / CoolStuffInc / eBay / Amazon), a nivel
-//     CARTA (mezcla todas las impresiones). CardMarket viene en EUROS,
-//     el resto en dólares.
-//   - `card_sets[]`: cada impresión (código + set + rareza) con su
-//     `set_price`, que es el precio de TCGPlayer DE ESA impresión.
+//  NO es la fuente de los precios que se muestran: esos salen de TCGPlayer
+//  (ver `tcgplayer.js`). Acá sólo se usa:
+//   - los datos de la carta (nombre, tipo, imagen, passcode);
+//   - `card_sets[]`: cada impresión (código + set + rareza), que es lo que
+//     llena el desplegable y lo que después se empareja con TCGPlayer. Su
+//     `set_price` sirve sólo como orientación en ese desplegable: está
+//     desactualizado y tiene huecos.
 //
-//  Ojo: ninguno de los dos es un historial de ventas. La API no publica
-//  ventas cerradas; lo más fino que hay es el `set_price` por impresión.
+//  `card_prices` (menor precio por página, a nivel carta) se dejó de usar:
+//  mezclaba todas las rarezas, así que no servía para tasar.
 //
 //  Rate limit de la API: 20 pedidos por segundo (pasarse = ban de 1 hora).
 // =====================================================================
@@ -105,8 +105,7 @@ function numero(v) {
 /**
  * Modelo de carta de la app:
  * `{ id, nombre, tipo, raza, atributo, nivel, atk, def, arquetipo,
- *    descripcion, imagen, imagenChica, precios, sets }`
- * - `precios`: `{ tcgplayer_price, cardmarket_price, ... }` ya numérico.
+ *    descripcion, imagen, imagenChica, sets }`
  * - `sets`: impresiones ordenadas de más cara a más barata.
  */
 function mapearCarta(c) {
