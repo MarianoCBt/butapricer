@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { ars, fechaCorta, numero } from '../utils/format'
 import { CASA_MANUAL } from '../data/cotizacion'
 
@@ -27,6 +28,16 @@ export default function BarraCotizacion({
 }) {
   const casas = cotizacion?.casas || []
 
+  // "Mi AVG" va segundo, justo debajo de Oficial: es la opción que más se
+  // usa, no tiene sentido tenerla al final. Se ubica buscando el oficial por
+  // id (no por posición) para no depender del orden en que venga la API.
+  const opciones = useMemo(() => {
+    const manual = { id: CASA_MANUAL, nombre: 'Mi AVG (a mano)' }
+    const i = casas.findIndex((c) => c.id === 'oficial')
+    const pos = i >= 0 ? i + 1 : Math.min(1, casas.length)
+    return [...casas.slice(0, pos), manual, ...casas.slice(pos)]
+  }, [casas])
+
   // Cuánto se está cobrando por encima (o por debajo) del blue.
   const recargo =
     referencia?.venta > 0 && tasaArs > 0
@@ -41,15 +52,13 @@ export default function BarraCotizacion({
           <select
             value={casaId}
             onChange={(e) => setCasaId(e.target.value)}
-            disabled={!casas.length}
-            className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-brand)] disabled:opacity-50"
+            className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-brand)]"
           >
-            {casas.map((c) => (
+            {opciones.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.nombre}
               </option>
             ))}
-            <option value={CASA_MANUAL}>Mi AVG (a mano)</option>
           </select>
         </label>
 
