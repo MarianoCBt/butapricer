@@ -57,21 +57,13 @@ export default function PreciosImpresion({ impresion, producto, tasaArs, cargand
               tasaArs={tasaArs}
             />
           </ul>
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--color-border)] px-4 py-2.5 text-xs text-[var(--color-muted)]">
-            <span>
-              {producto.listados > 0
-                ? `${producto.listados} publicaciones activas`
-                : 'Sin publicaciones activas'}
-            </span>
-            <a
-              href={producto.url}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="underline decoration-transparent underline-offset-2 transition-colors duration-150 hover:text-[var(--color-ink)] hover:decoration-[var(--color-brand-ink)]"
-            >
-              Ver en TCGPlayer →
-            </a>
-          </div>
+          {/* El link a TCGPlayer vive en LinksTiendas, junto al de las otras
+              páginas; acá quedaría duplicado. */}
+          <p className="border-t border-[var(--color-border)] px-4 py-2.5 text-xs text-[var(--color-muted)]">
+            {producto.listados > 0
+              ? `${producto.listados} publicaciones activas`
+              : 'Sin publicaciones activas'}
+          </p>
         </>
       ) : (
         <p className="px-4 py-4 text-sm text-[var(--color-muted)]">

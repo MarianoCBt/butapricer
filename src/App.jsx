@@ -19,6 +19,7 @@ import Buscador from './components/Buscador'
 import FichaCarta from './components/FichaCarta'
 import PreciosImpresion from './components/PreciosImpresion'
 import UltimasVentas from './components/UltimasVentas'
+import LinksTiendas from './components/LinksTiendas'
 import ModalPrecio from './components/ModalPrecio'
 import Lista from './views/Lista'
 import Historial, { guardarEnHistorial, leerHistorial } from './components/Historial'
@@ -336,6 +337,7 @@ export default function App() {
                   cargando={cargandoVentas}
                   hayProducto={Boolean(productoTcg)}
                 />
+                <LinksTiendas carta={carta} producto={productoTcg} />
 
                 {/* Pegado abajo en el teléfono: se usa cargando una carta
                     atrás de otra, y así no hay que scrollear para agregar. */}

@@ -45,3 +45,48 @@ export const config = {
     ventasVisibles: 12,
   },
 }
+
+// ---------------------------------------------------------------------
+//  Páginas para comparar a mano.
+//
+//  Son SOLO LINKS, no fuentes de precio. Los precios de la app salen todos
+//  de TCGPlayer (ver src/data/tcgplayer.js). CardMarket responde 403 detrás
+//  de Cloudflare y las páginas de búsqueda de CoolStuffInc devuelven cuerpo
+//  vacío a cualquier cliente que no sea un navegador real: sacarles precios
+//  necesitaría un navegador headless, no el proxy simple que usamos. Así que
+//  se ofrece el link y el precio lo mira el usuario.
+//
+//  `logos` es opcional y son CANDIDATOS: se prueban en orden y se muestra
+//  el primero que exista, así da igual si el archivo es .svg o .png. Si no
+//  hay ninguno se muestra el nombre en texto y no se rompe nada.
+// ---------------------------------------------------------------------
+const asset = (f) => import.meta.env.BASE_URL + f
+
+const logos = (id) => [asset(`tiendas/${id}.svg`), asset(`tiendas/${id}.png`)]
+
+export const TIENDAS = [
+  {
+    id: 'tcgplayer',
+    label: 'TCGPlayer',
+    logos: logos('tcgplayer'),
+    color: 'var(--color-tcg)',
+    url: (nombre) =>
+      `https://www.tcgplayer.com/search/yugioh/product?productLineName=yugioh&q=${encodeURIComponent(nombre)}`,
+  },
+  {
+    id: 'coolstuffinc',
+    label: 'CoolStuffInc',
+    logos: logos('coolstuffinc'),
+    color: 'var(--color-csi)',
+    url: (nombre) =>
+      `https://www.coolstuffinc.com/main_search.php?pa=searchOnName&page=1&q=${encodeURIComponent(nombre)}`,
+  },
+  {
+    id: 'cardmarket',
+    label: 'CardMarket',
+    logos: logos('cardmarket'),
+    color: 'var(--color-mkt)',
+    url: (nombre) =>
+      `https://www.cardmarket.com/en/YuGiOh/Products/Search?searchString=${encodeURIComponent(nombre)}`,
+  },
+]
