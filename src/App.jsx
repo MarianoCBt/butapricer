@@ -12,14 +12,15 @@ import {
   emparejarImpresion,
   traerVentas,
 } from './data/tcgplayer'
-import { filasDePrecios, resumen as calcularResumen } from './utils/precio'
+import { useLista } from './store/lista'
 import Header from './components/Header'
 import BarraCotizacion from './components/BarraCotizacion'
 import Buscador from './components/Buscador'
 import FichaCarta from './components/FichaCarta'
 import PreciosImpresion from './components/PreciosImpresion'
 import UltimasVentas from './components/UltimasVentas'
-import TablaPrecios from './components/TablaPrecios'
+import ModalPrecio from './components/ModalPrecio'
+import Lista from './views/Lista'
 import Historial, { guardarEnHistorial, leerHistorial } from './components/Historial'
 
 // ---------------------------------------------------------------------
@@ -27,6 +28,7 @@ import Historial, { guardarEnHistorial, leerHistorial } from './components/Histo
 //  compartir o dejar guardado.  #carta/<passcode>[/<impresión>]
 //  La impresión va como `código~rareza` (ver claveImpresion): el código
 //  solo no alcanza porque se repite entre rarezas.
+//  `#lista` abre la lista armada.
 // ---------------------------------------------------------------------
 function parseHash(hash) {
   const m = /^#carta\/(\d+)(?:\/(.+))?$/.exec(hash || '')
@@ -92,7 +94,6 @@ export default function App() {
   const casa = casaPorId(cotizacion, casaId)
   const blue = casaPorId(cotizacion, 'blue')
   const tasaArs = esManual ? dolarManual : casa?.venta || 0
-  const eurUsd = cotizacion?.eurUsd || 0
 
   // Al pasar a manual por primera vez, arrancamos desde el valor que estaba
   // a la vista en vez de dejar el campo en cero (y toda la app en "—").
@@ -254,12 +255,10 @@ export default function App() {
     [ventas, condicionVenta],
   )
 
-  // ---- Cálculos ---------------------------------------------------
-  const filas = useMemo(
-    () => (carta ? filasDePrecios(carta, eurUsd, tasaArs) : []),
-    [carta, eurUsd, tasaArs],
-  )
-  const resumen = useMemo(() => calcularResumen(filas, tasaArs), [filas, tasaArs])
+  // ---- Lista de compra ---------------------------------------------
+  const lista = useLista()
+  const [modalAbierto, setModalAbierto] = useState(false)
+  const enLista = hash === '#lista'
 
   const limpiarHistorial = () => {
     localStorage.removeItem('buta.pricer.historial')
@@ -269,7 +268,11 @@ export default function App() {
   return (
     <div className="flex min-h-full flex-col">
       <div className="sticky top-0 z-30">
-        <Header onInicio={() => (window.location.hash = '')} />
+        <Header
+          onInicio={() => (window.location.hash = '')}
+          onLista={() => (window.location.hash = '#lista')}
+          cantidadLista={lista.cantidad}
+        />
         <BarraCotizacion
           cotizacion={cotizacion}
           casaId={casaId}
@@ -286,7 +289,19 @@ export default function App() {
       </div>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-4 md:py-6">
-        {carta ? (
+        {enLista ? (
+          <Lista
+            items={lista.items}
+            quitar={lista.quitar}
+            vaciar={lista.vaciar}
+            descuento={lista.descuento}
+            setDescuento={lista.setDescuento}
+            subtotal={lista.subtotal}
+            ahorro={lista.ahorro}
+            total={lista.total}
+            onSeguirCargando={() => (window.location.hash = '')}
+          />
+        ) : carta ? (
           <>
             <Buscador compacto onElegir={(c) => irACarta(c.id)} onConsultar={consultar} />
 
@@ -321,12 +336,18 @@ export default function App() {
                   cargando={cargandoVentas}
                   hayProducto={Boolean(productoTcg)}
                 />
-                <TablaPrecios
-                  filas={filas}
-                  resumen={resumen}
-                  hayImpresion={Boolean(impresion)}
-                  tasaArs={tasaArs}
-                />
+
+                {/* Pegado abajo en el teléfono: se usa cargando una carta
+                    atrás de otra, y así no hay que scrollear para agregar. */}
+                <div className="sticky bottom-0 z-20 -mx-4 border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+                  <button
+                    type="button"
+                    onClick={() => setModalAbierto(true)}
+                    className="min-h-11 w-full rounded-lg bg-[var(--color-brand)] px-4 py-2.5 font-semibold text-white transition-colors duration-150 hover:bg-[var(--color-brand-dark)]"
+                  >
+                    Agregar a la lista
+                  </button>
+                </div>
               </div>
             </div>
           </>
@@ -387,6 +408,23 @@ export default function App() {
         Precios de referencia vía TCGPlayer y YGOPRODeck · cotización vía
         dolarapi.com. Valores orientativos.
       </footer>
+
+      <ModalPrecio
+        abierto={modalAbierto}
+        onCerrar={() => setModalAbierto(false)}
+        onAgregar={lista.agregar}
+        carta={carta}
+        impresion={impresion}
+        producto={productoTcg}
+        ventas={ventasFiltradas}
+        casas={cotizacion?.casas || []}
+        casaId={casaId}
+        setCasaId={elegirCasa}
+        esManual={esManual}
+        dolarManual={dolarManual}
+        setDolarManual={setDolarManual}
+        tasaArs={tasaArs}
+      />
     </div>
   )
 }

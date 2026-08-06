@@ -45,39 +45,3 @@ export const config = {
     ventasVisibles: 12,
   },
 }
-
-// Las tres páginas que comparamos, en el orden en que se muestran.
-// `campo` es la clave dentro de `card_prices` de YGOPRODeck.
-export const TIENDAS = [
-  {
-    id: 'tcgplayer',
-    label: 'TCGPlayer',
-    campo: 'tcgplayer_price',
-    moneda: 'USD',
-    color: 'var(--color-tcg)',
-    // Qué es exactamente el número que devuelve la API.
-    nota: 'Menor precio entre las versiones de la carta.',
-    url: (nombre) =>
-      `https://www.tcgplayer.com/search/yugioh/product?productLineName=yugioh&q=${encodeURIComponent(nombre)}`,
-  },
-  {
-    id: 'cardmarket',
-    label: 'CardMarket',
-    campo: 'cardmarket_price',
-    moneda: 'EUR',
-    color: 'var(--color-mkt)',
-    nota: 'Menor precio en euros (mercado europeo).',
-    url: (nombre) =>
-      `https://www.cardmarket.com/en/YuGiOh/Products/Search?searchString=${encodeURIComponent(nombre)}`,
-  },
-  {
-    id: 'coolstuffinc',
-    label: 'CoolStuffInc',
-    campo: 'coolstuffinc_price',
-    moneda: 'USD',
-    color: 'var(--color-csi)',
-    nota: 'Precio de venta al público de la tienda.',
-    url: (nombre) =>
-      `https://www.coolstuffinc.com/main_search.php?pa=searchOnName&page=1&q=${encodeURIComponent(nombre)}`,
-  },
-]

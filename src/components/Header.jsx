@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { config } from '../config'
 
-export default function Header({ onInicio }) {
+export default function Header({ onInicio, onLista, cantidadLista = 0 }) {
   const [sinLogo, setSinLogo] = useState(false)
 
   return (
@@ -30,6 +30,20 @@ export default function Header({ onInicio }) {
               {config.tagline}
             </span>
           </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onLista}
+          className="ml-auto flex min-h-9 items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-muted)] transition-colors duration-150 hover:border-[var(--color-brand)] hover:text-[var(--color-ink)]"
+        >
+          <span aria-hidden="true">🧾</span>
+          <span className="hidden sm:inline">Lista</span>
+          {cantidadLista > 0 && (
+            <span className="tabular rounded-full bg-[var(--color-brand)] px-1.5 py-0.5 text-xs font-semibold text-white">
+              {cantidadLista}
+            </span>
+          )}
         </button>
       </div>
     </header>

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { ars, fechaCorta, numero } from '../utils/format'
-import { CASA_MANUAL } from '../data/cotizacion'
+import { opcionesDeCasas } from '../data/cotizacion'
 
 /**
  * Barra con la cotización del día. El usuario elige QUÉ dólar usar para
@@ -28,15 +28,7 @@ export default function BarraCotizacion({
 }) {
   const casas = cotizacion?.casas || []
 
-  // "Mi AVG" va segundo, justo debajo de Oficial: es la opción que más se
-  // usa, no tiene sentido tenerla al final. Se ubica buscando el oficial por
-  // id (no por posición) para no depender del orden en que venga la API.
-  const opciones = useMemo(() => {
-    const manual = { id: CASA_MANUAL, nombre: 'Mi AVG (a mano)' }
-    const i = casas.findIndex((c) => c.id === 'oficial')
-    const pos = i >= 0 ? i + 1 : Math.min(1, casas.length)
-    return [...casas.slice(0, pos), manual, ...casas.slice(pos)]
-  }, [casas])
+  const opciones = useMemo(() => opcionesDeCasas(casas), [casas])
 
   // Cuánto se está cobrando por encima (o por debajo) del blue.
   const recargo =
@@ -98,15 +90,6 @@ export default function BarraCotizacion({
             {numero(recargo, 1)}% vs blue
           </span>
         )}
-
-        {/* El cruce del euro y la fecha son detalle: en el teléfono ocupaban
-            dos renglones enteros arriba de todo. Se ven de md para arriba. */}
-        <span className="tabular hidden text-[var(--color-muted)] md:inline">
-          1 € ={' '}
-          <span className="text-[var(--color-ink)]">
-            US$ {numero(cotizacion?.eurUsd || 0, 3)}
-          </span>
-        </span>
 
         <span className="ml-auto flex items-center gap-3 text-xs text-[var(--color-muted)]">
           {cotizacion?.offline ? (

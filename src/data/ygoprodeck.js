@@ -110,7 +110,6 @@ function numero(v) {
  * - `sets`: impresiones ordenadas de más cara a más barata.
  */
 function mapearCarta(c) {
-  const p = c.card_prices?.[0] || {}
   return {
     id: c.id,
     nombre: c.name || '',
@@ -125,13 +124,6 @@ function mapearCarta(c) {
     descripcion: c.desc || '',
     imagen: c.card_images?.[0]?.image_url || '',
     imagenChica: c.card_images?.[0]?.image_url_small || '',
-    precios: {
-      tcgplayer_price: numero(p.tcgplayer_price),
-      cardmarket_price: numero(p.cardmarket_price),
-      coolstuffinc_price: numero(p.coolstuffinc_price),
-      ebay_price: numero(p.ebay_price),
-      amazon_price: numero(p.amazon_price),
-    },
     sets: (c.card_sets || [])
       .map((s) => ({
         codigo: s.set_code || '',

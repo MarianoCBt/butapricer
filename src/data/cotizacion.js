@@ -1,21 +1,14 @@
 // =====================================================================
 //  Cotización del día (dolarapi.com — público, con CORS abierto).
 //
-//  - `/v1/dolares` da todas las casas de dólar (oficial, blue, tarjeta…).
-//  - `/v1/cotizaciones` da además el EURO oficial, con el que calculamos
-//    el cruce EUR/USD para poder pasar los precios de CardMarket (que
-//    están en euros) a la misma moneda que el resto.
-//
-//  El cruce se calcula como EUR_oficial / USD_oficial en vez de usar un
-//  "euro blue": lo que nos interesa es cuántos dólares vale un euro en el
-//  mercado internacional, y después multiplicar por la casa de dólar que
-//  el usuario realmente paga.
+//  `/v1/dolares` da todas las casas de dólar; nos quedamos con las de
+//  `config.casasVisibles`. Todos los precios de la app vienen en dólares,
+//  así que no hace falta ninguna otra moneda.
 // =====================================================================
 
 import { config } from '../config'
 
 const DOLARES_API = 'https://dolarapi.com/v1/dolares'
-const COTIZACIONES_API = 'https://dolarapi.com/v1/cotizaciones'
 
 const CACHE_KEY = 'buta.pricer.cotizacion'
 
@@ -23,7 +16,6 @@ const CACHE_KEY = 'buta.pricer.cotizacion'
 // que la app no quede inservible: la UI avisa que está desactualizado.
 const RESPALDO = {
   casas: [{ id: 'blue', nombre: 'Blue', compra: 0, venta: 0 }],
-  eurUsd: 1.08,
   fecha: null,
   offline: true,
 }
@@ -40,13 +32,10 @@ async function fetchJson(url) {
 
 /**
  * Descarga la cotización. Devuelve
- * `{ casas: [{ id, nombre, compra, venta, fecha }], eurUsd, fecha, offline }`.
+ * `{ casas: [{ id, nombre, compra, venta, fecha }], fecha, offline }`.
  */
 export async function traerCotizacion() {
-  const [dolares, cotizaciones] = await Promise.all([
-    fetchJson(DOLARES_API),
-    fetchJson(COTIZACIONES_API),
-  ])
+  const dolares = await fetchJson(DOLARES_API)
 
   if (!Array.isArray(dolares) || !dolares.length) {
     return leerCache() || RESPALDO
@@ -65,15 +54,8 @@ export async function traerCotizacion() {
       fecha: d.fechaActualizacion || null,
     }))
 
-  // Cruce EUR/USD a partir de las cotizaciones oficiales en ARS.
-  const eur = cotizaciones?.find((c) => c.moneda === 'EUR' && c.casa === 'oficial')
-  const usd = cotizaciones?.find((c) => c.moneda === 'USD' && c.casa === 'oficial')
-  const eurUsd =
-    eur?.venta && usd?.venta ? Number(eur.venta) / Number(usd.venta) : RESPALDO.eurUsd
-
   const datos = {
     casas,
-    eurUsd,
     fecha: casas[0]?.fecha || new Date().toISOString(),
     offline: false,
   }
@@ -111,6 +93,21 @@ export function leerCache() {
 // Id reservado para el dólar cargado a mano ("mi AVG"): no viene de la API,
 // lo pone el usuario. Ver BarraCotizacion.
 export const CASA_MANUAL = 'manual'
+
+/**
+ * Las casas tal como se ofrecen en un desplegable, con "Mi AVG" **segundo**,
+ * justo debajo del oficial: es la opción que más se usa. Se ubica buscando
+ * el oficial por id (no por posición) para no depender del orden de la API.
+ *
+ * Vive acá y no en un componente porque la usan el selector de la barra y
+ * el del popup de precio, y tienen que coincidir.
+ */
+export function opcionesDeCasas(casas = []) {
+  const manual = { id: CASA_MANUAL, nombre: 'Mi AVG (a mano)' }
+  const i = casas.findIndex((c) => c.id === 'oficial')
+  const pos = i >= 0 ? i + 1 : Math.min(1, casas.length)
+  return [...casas.slice(0, pos), manual, ...casas.slice(pos)]
+}
 
 /** Busca una casa por id, con la primera como respaldo. */
 export function casaPorId(cotizacion, id) {
