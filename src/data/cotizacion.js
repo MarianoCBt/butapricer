@@ -12,6 +12,8 @@
 //  el usuario realmente paga.
 // =====================================================================
 
+import { config } from '../config'
+
 const DOLARES_API = 'https://dolarapi.com/v1/dolares'
 const COTIZACIONES_API = 'https://dolarapi.com/v1/cotizaciones'
 
@@ -50,13 +52,18 @@ export async function traerCotizacion() {
     return leerCache() || RESPALDO
   }
 
-  const casas = dolares.map((d) => ({
-    id: d.casa,
-    nombre: d.nombre,
-    compra: Number(d.compra) || 0,
-    venta: Number(d.venta) || 0,
-    fecha: d.fechaActualizacion || null,
-  }))
+  // Sólo las casas que configuramos, en el orden de `config.casasVisibles`.
+  const porId = new Map(dolares.map((d) => [d.casa, d]))
+  const casas = config.casasVisibles
+    .map((id) => porId.get(id))
+    .filter(Boolean)
+    .map((d) => ({
+      id: d.casa,
+      nombre: d.nombre,
+      compra: Number(d.compra) || 0,
+      venta: Number(d.venta) || 0,
+      fecha: d.fechaActualizacion || null,
+    }))
 
   // Cruce EUR/USD a partir de las cotizaciones oficiales en ARS.
   const eur = cotizaciones?.find((c) => c.moneda === 'EUR' && c.casa === 'oficial')

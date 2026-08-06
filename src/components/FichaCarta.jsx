@@ -29,54 +29,76 @@ function Dato({ etiqueta, valor }) {
   )
 }
 
+function Imagen({ carta, className }) {
+  const [sinImagen, setSinImagen] = useState(false)
+  if (sinImagen || !carta.imagen) {
+    return (
+      <div
+        className={`flex items-center justify-center rounded-lg bg-[var(--color-surface-2)] text-3xl ${className}`}
+      >
+        🃏
+      </div>
+    )
+  }
+  return (
+    <img
+      src={carta.imagen}
+      alt={carta.nombre}
+      className={`rounded-lg bg-[var(--color-surface-2)] object-contain ${className}`}
+      onError={() => setSinImagen(true)}
+    />
+  )
+}
+
 /**
- * Imagen + datos de la carta y, debajo, el selector de IMPRESIÓN.
- * La impresión importa: el precio de una Secret Rare y el de la misma
- * carta en Common no tienen nada que ver.
+ * Ficha de la carta y selector de IMPRESIÓN.
+ *
+ * En teléfono va compacta a propósito: miniatura + nombre en una fila, y
+ * los datos de la carta (ATK/DEF, atributo…) plegados. Quien consulta un
+ * precio quiere el precio, no la ficha técnica; antes había que scrollear
+ * media pantalla de foto y datos para llegar al primer número.
+ * En escritorio, donde la ficha va en su propia columna, se muestra
+ * entera y con la imagen grande.
  */
 export default function FichaCarta({ carta, impresion, onCambiarImpresion }) {
-  const [sinImagen, setSinImagen] = useState(false)
   const idioma = impresion ? idiomaDeCodigo(impresion.codigo) : ''
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* En mobile la ficha ocupa todo el ancho: sin tope, la carta se
-          estiraría a ~700px de alto y taparía la tabla de precios. */}
-      <div className="mx-auto w-full max-w-[13rem] overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] md:max-w-none">
-        {sinImagen || !carta.imagen ? (
-          <div className="flex aspect-[59/86] items-center justify-center text-5xl">
-            🃏
-          </div>
-        ) : (
-          <img
-            src={carta.imagen}
-            alt={carta.nombre}
-            className="aspect-[59/86] w-full object-contain"
-            onError={() => setSinImagen(true)}
-          />
-        )}
-      </div>
-
-      <div>
-        <h2 className="text-lg font-bold leading-snug text-[var(--color-ink)]">
-          {carta.nombre}
-        </h2>
-        <p className="mt-0.5 text-sm text-[var(--color-muted)]">{carta.tipo}</p>
-      </div>
-
-      <dl className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm">
-        <Dato etiqueta="Raza" valor={carta.raza} />
-        <Dato etiqueta="Atributo" valor={carta.atributo} />
-        <Dato etiqueta="Nivel / Rango" valor={carta.nivel} />
-        <Dato
-          etiqueta="ATK / DEF"
-          valor={carta.atk !== null ? `${carta.atk} / ${carta.def ?? '—'}` : null}
+    <div className="flex flex-col gap-3 md:gap-4">
+      {/* Encabezado: en mobile miniatura + nombre lado a lado */}
+      <div className="flex items-start gap-3 md:block">
+        <Imagen
+          carta={carta}
+          className="aspect-[59/86] w-20 shrink-0 md:mb-4 md:w-full"
         />
-        <Dato etiqueta="Arquetipo" valor={carta.arquetipo} />
-        <Dato etiqueta="Passcode" valor={carta.id} />
-      </dl>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base font-bold leading-snug text-[var(--color-ink)] md:text-lg">
+            {carta.nombre}
+          </h2>
+          <p className="mt-0.5 text-sm text-[var(--color-muted)]">{carta.tipo}</p>
+          {impresion && (
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+              <span
+                className="rounded-full px-2 py-0.5 font-semibold"
+                style={{
+                  color: rarezaColor(impresion.rareza),
+                  backgroundColor:
+                    'color-mix(in srgb, currentColor 15%, transparent)',
+                }}
+              >
+                {impresion.rareza || 'Sin rareza'}
+              </span>
+              {idioma && (
+                <span className="rounded-full bg-[var(--color-surface-2)] px-2 py-0.5 text-[var(--color-muted)]">
+                  {idioma}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
-      {/* Selector de impresión */}
+      {/* Selector de impresión: el control principal, va antes que nada */}
       <div>
         <label
           htmlFor="impresion"
@@ -89,7 +111,7 @@ export default function FichaCarta({ carta, impresion, onCambiarImpresion }) {
             id="impresion"
             value={impresion ? claveImpresion(impresion) : ''}
             onChange={(e) => onCambiarImpresion(e.target.value)}
-            className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-brand)]"
+            className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2.5 text-sm text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-brand)]"
           >
             <option value="">Todas (precio general de la carta)</option>
             {agruparPorRareza(carta.sets).map(([rareza, sets]) => (
@@ -108,26 +130,28 @@ export default function FichaCarta({ carta, impresion, onCambiarImpresion }) {
             Esta carta no tiene impresiones cargadas en la base.
           </p>
         )}
-
-        {impresion && (
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-            <span
-              className="rounded-full px-2 py-0.5 font-semibold"
-              style={{
-                color: rarezaColor(impresion.rareza),
-                backgroundColor: 'color-mix(in srgb, currentColor 15%, transparent)',
-              }}
-            >
-              {impresion.rareza || 'Sin rareza'}
-            </span>
-            {idioma && (
-              <span className="rounded-full bg-[var(--color-surface-2)] px-2 py-0.5 text-[var(--color-muted)]">
-                {idioma}
-              </span>
-            )}
-          </div>
-        )}
       </div>
+
+      {/* Datos de la carta: plegados en mobile, abiertos en escritorio */}
+      <details className="group rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+        <summary className="cursor-pointer list-none px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)] transition-colors duration-150 hover:text-[var(--color-ink)]">
+          Datos de la carta
+          <span className="float-right transition-transform duration-150 group-open:rotate-180">
+            ▾
+          </span>
+        </summary>
+        <dl className="border-t border-[var(--color-border)] px-3 py-2 text-sm">
+          <Dato etiqueta="Raza" valor={carta.raza} />
+          <Dato etiqueta="Atributo" valor={carta.atributo} />
+          <Dato etiqueta="Nivel / Rango" valor={carta.nivel} />
+          <Dato
+            etiqueta="ATK / DEF"
+            valor={carta.atk !== null ? `${carta.atk} / ${carta.def ?? '—'}` : null}
+          />
+          <Dato etiqueta="Arquetipo" valor={carta.arquetipo} />
+          <Dato etiqueta="Passcode" valor={carta.id} />
+        </dl>
+      </details>
     </div>
   )
 }

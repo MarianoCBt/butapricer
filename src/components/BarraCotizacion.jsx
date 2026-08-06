@@ -52,7 +52,7 @@ export default function BarraCotizacion({
           <select
             value={casaId}
             onChange={(e) => setCasaId(e.target.value)}
-            className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-brand)]"
+            className="min-h-9 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-brand)]"
           >
             {opciones.map((c) => (
               <option key={c.id} value={c.id}>
@@ -73,7 +73,7 @@ export default function BarraCotizacion({
               onChange={(e) => setDolarManual(Number(e.target.value))}
               placeholder="2000"
               aria-label="Valor del dólar con el que tasás"
-              className="tabular w-24 rounded-md border border-[var(--color-brand)] bg-[var(--color-surface)] px-2 py-1 font-semibold text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-brand-ink)]"
+              className="tabular min-h-9 w-24 rounded-md border border-[var(--color-brand)] bg-[var(--color-surface)] px-2 py-1.5 font-semibold text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-brand-ink)]"
             />
           </label>
         ) : (
@@ -99,7 +99,9 @@ export default function BarraCotizacion({
           </span>
         )}
 
-        <span className="tabular text-[var(--color-muted)]">
+        {/* El cruce del euro y la fecha son detalle: en el teléfono ocupaban
+            dos renglones enteros arriba de todo. Se ven de md para arriba. */}
+        <span className="tabular hidden text-[var(--color-muted)] md:inline">
           1 € ={' '}
           <span className="text-[var(--color-ink)]">
             US$ {numero(cotizacion?.eurUsd || 0, 3)}
@@ -109,18 +111,26 @@ export default function BarraCotizacion({
         <span className="ml-auto flex items-center gap-3 text-xs text-[var(--color-muted)]">
           {cotizacion?.offline ? (
             <span className="rounded bg-amber-500/10 px-2 py-0.5 text-amber-400">
-              Sin conexión — último valor guardado
+              Sin conexión
             </span>
           ) : (
-            cotizacion?.fecha && <span>Actualizado {fechaCorta(cotizacion.fecha)}</span>
+            cotizacion?.fecha && (
+              <span className="hidden md:inline">
+                Actualizado {fechaCorta(cotizacion.fecha)}
+              </span>
+            )
           )}
           <button
             type="button"
             onClick={onRefrescar}
             disabled={cargando}
-            className="rounded-md border border-[var(--color-border)] px-2 py-1 text-[var(--color-muted)] transition-colors duration-150 hover:border-[var(--color-brand)] hover:text-[var(--color-ink)] disabled:opacity-50"
+            title="Actualizar cotización"
+            className="min-h-9 rounded-md border border-[var(--color-border)] px-3 py-1.5 text-[var(--color-muted)] transition-colors duration-150 hover:border-[var(--color-brand)] hover:text-[var(--color-ink)] disabled:opacity-50"
           >
-            {cargando ? 'Actualizando…' : '↻ Actualizar'}
+            {cargando ? '…' : '↻'}
+            <span className="ml-1 hidden md:inline">
+              {cargando ? 'Actualizando' : 'Actualizar'}
+            </span>
           </button>
         </span>
       </div>

@@ -15,18 +15,14 @@ export const config = {
   locale: 'es-AR',
 
   // Casa de dólar usada por defecto para convertir a ARS.
-  // Valores posibles (dolarapi.com): oficial, blue, bolsa, contadoconliqui,
-  // mayorista, cripto, tarjeta.
   casaDolarPorDefecto: 'blue',
 
-  // Regla de venta (misma que el importador de ButaTCG):
-  //   precio = usd × cotización × (1 + margen/100) + recargoFijo
-  // redondeado hacia arriba al múltiplo de `redondeo`.
-  venta: {
-    margen: 36, // %
-    recargoFijo: 800, // ARS
-    redondeo: 100, // ARS
-  },
+  // Qué casas de dolarapi.com se ofrecen, EN ESTE ORDEN. La API devuelve
+  // más (bolsa, contadoconliqui, mayorista, tarjeta) pero no aportan para
+  // tasar cartas y sólo alargan el desplegable en el teléfono.
+  // "Mi AVG" no está acá: no viene de la API y se inserta después del
+  // oficial (ver BarraCotizacion).
+  casasVisibles: ['oficial', 'blue', 'cripto'],
 
   // Cada cuánto refrescar la cotización automáticamente (minutos).
   refreshMinutos: 30,

@@ -85,7 +85,7 @@ export default function Buscador({ onElegir, onConsultar, compacto }) {
           onChange={(e) => setTexto(e.target.value)}
           onKeyDown={teclas}
           onFocus={() => sugerencias.length && setAbierto(true)}
-          placeholder="Nombre de la carta o código (ej: Dark Magician o RA03-EN001)"
+          placeholder="Nombre o código de la carta"
           aria-label="Buscar carta por nombre o código"
           className={`min-w-0 flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder:text-[var(--color-muted)] transition-colors duration-150 hover:border-[var(--color-brand)] focus:border-[var(--color-brand)] ${
             compacto ? 'px-3 py-2 text-sm' : 'px-4 py-3 text-base'

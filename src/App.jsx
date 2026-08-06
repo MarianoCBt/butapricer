@@ -10,7 +10,6 @@ import { CASA_MANUAL, casaPorId, leerCache, traerCotizacion } from './data/cotiz
 import {
   buscarImpresiones,
   emparejarImpresion,
-  promedioVentas,
   traerVentas,
 } from './data/tcgplayer'
 import { filasDePrecios, resumen as calcularResumen } from './utils/precio'
@@ -21,7 +20,6 @@ import FichaCarta from './components/FichaCarta'
 import PreciosImpresion from './components/PreciosImpresion'
 import UltimasVentas from './components/UltimasVentas'
 import TablaPrecios from './components/TablaPrecios'
-import PrecioVenta from './components/PrecioVenta'
 import Historial, { guardarEnHistorial, leerHistorial } from './components/Historial'
 
 // ---------------------------------------------------------------------
@@ -256,11 +254,6 @@ export default function App() {
     [ventas, condicionVenta],
   )
 
-  const promedioVentasUsd = useMemo(
-    () => promedioVentas(ventasFiltradas),
-    [ventasFiltradas],
-  )
-
   // ---- Cálculos ---------------------------------------------------
   const filas = useMemo(
     () => (carta ? filasDePrecios(carta, eurUsd, tasaArs) : []),
@@ -292,7 +285,7 @@ export default function App() {
         />
       </div>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-4 md:py-6">
         {carta ? (
           <>
             <Buscador compacto onElegir={(c) => irACarta(c.id)} onConsultar={consultar} />
@@ -304,7 +297,7 @@ export default function App() {
             )}
 
             <div
-              className="mt-6 grid gap-6 md:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]"
+              className="mt-4 grid gap-4 md:mt-6 md:grid-cols-[minmax(0,17rem)_minmax(0,1fr)] md:gap-6"
               style={{ animation: 'panel-in 160ms ease-out' }}
             >
               <FichaCarta
@@ -312,7 +305,7 @@ export default function App() {
                 impresion={impresion}
                 onCambiarImpresion={cambiarImpresion}
               />
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4 md:gap-6">
                 <PreciosImpresion
                   impresion={impresion}
                   producto={productoTcg}
@@ -332,12 +325,6 @@ export default function App() {
                   filas={filas}
                   resumen={resumen}
                   hayImpresion={Boolean(impresion)}
-                />
-                <PrecioVenta
-                  resumen={resumen}
-                  impresion={impresion}
-                  productoTcg={productoTcg}
-                  promedioVentasUsd={promedioVentasUsd}
                   tasaArs={tasaArs}
                 />
               </div>
@@ -397,8 +384,8 @@ export default function App() {
       </main>
 
       <footer className="border-t border-[var(--color-border)] px-4 py-4 text-center text-xs text-[var(--color-muted)]">
-        Precios de referencia vía YGOPRODeck · cotización vía dolarapi.com. Los
-        valores son orientativos, no ventas cerradas.
+        Precios de referencia vía TCGPlayer y YGOPRODeck · cotización vía
+        dolarapi.com. Valores orientativos.
       </footer>
     </div>
   )

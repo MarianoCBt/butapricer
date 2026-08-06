@@ -3,7 +3,7 @@
 //  entre páginas y precio de venta sugerido.
 // =====================================================================
 
-import { TIENDAS, config } from '../config'
+import { TIENDAS } from '../config'
 
 /** Pasa una cifra de EUR a USD usando el cruce del día. */
 export function eurAUsd(eur, eurUsd) {
@@ -56,16 +56,4 @@ export function resumen(filas, tasaArs) {
     maxUsd: Math.max(...valores),
     baratas: validas.filter((f) => f.usd === Math.min(...valores)).map((f) => f.id),
   }
-}
-
-/**
- * Precio de venta sugerido en ARS, con la regla del negocio:
- *   usd × cotización × (1 + margen/100) + recargoFijo
- * redondeado hacia arriba al múltiplo de `redondeo`.
- */
-export function precioVenta(usd, tasaArs, reglas = config.venta) {
-  if (!Number.isFinite(usd) || usd <= 0 || !tasaArs) return 0
-  const { margen = 0, recargoFijo = 0, redondeo = 1 } = reglas
-  const bruto = usd * tasaArs * (1 + margen / 100) + recargoFijo
-  return redondeo > 1 ? Math.ceil(bruto / redondeo) * redondeo : Math.round(bruto)
 }
