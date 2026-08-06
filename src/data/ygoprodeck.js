@@ -75,17 +75,22 @@ const cache = new Map()
 
 async function fetchJson(url) {
   if (cache.has(url)) return cache.get(url)
-  let out = null
   try {
     const res = await fetch(url)
     const data = await res.json().catch(() => null)
-    // Cuando no hay resultados la API responde 400 con `{ error }`.
-    out = res.ok && data && !data.error ? data : null
+    // Cuando no hay resultados la API responde 400 con `{ error }`. Eso sí
+    // se cachea (la respuesta no va a cambiar), pero una caída de red no:
+    // si no, un error pasajero deja la carta rota por toda la sesión.
+    if (data?.error) {
+      cache.set(url, null)
+      return null
+    }
+    if (!res.ok || !data) return null
+    cache.set(url, data)
+    return data
   } catch {
-    out = null
+    return null
   }
-  cache.set(url, out)
-  return out
 }
 
 // ---------------------------------------------------------------------

@@ -3,6 +3,22 @@ import { moneda } from '../utils/format'
 import { rarezaColor } from '../utils/rareza'
 import { claveImpresion, idiomaDeCodigo } from '../data/ygoprodeck'
 
+/**
+ * Agrupa las impresiones por rareza para el desplegable. Los grupos se
+ * ordenan por la impresión más cara de cada uno, así las rarezas que
+ * importan quedan arriba en vez de mezcladas.
+ */
+function agruparPorRareza(sets) {
+  const grupos = new Map()
+  for (const s of sets) {
+    const clave = s.rareza || 'Sin rareza'
+    if (!grupos.has(clave)) grupos.set(clave, [])
+    grupos.get(clave).push(s)
+  }
+  const tope = (lista) => Math.max(...lista.map((s) => s.precioUsd || 0))
+  return [...grupos.entries()].sort((a, b) => tope(b[1]) - tope(a[1]))
+}
+
 function Dato({ etiqueta, valor }) {
   if (valor === null || valor === undefined || valor === '') return null
   return (
@@ -76,11 +92,15 @@ export default function FichaCarta({ carta, impresion, onCambiarImpresion }) {
             className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-brand)]"
           >
             <option value="">Todas (precio general de la carta)</option>
-            {carta.sets.map((s, i) => (
-              <option key={`${claveImpresion(s)}-${i}`} value={claveImpresion(s)}>
-                {s.codigo} · {s.rareza} · {s.setNombre}
-                {s.precioUsd > 0 ? ` — ${moneda(s.precioUsd)}` : ''}
-              </option>
+            {agruparPorRareza(carta.sets).map(([rareza, sets]) => (
+              <optgroup key={rareza} label={rareza}>
+                {sets.map((s, i) => (
+                  <option key={`${claveImpresion(s)}-${i}`} value={claveImpresion(s)}>
+                    {s.codigo} · {s.setNombre}
+                    {s.precioUsd > 0 ? ` — ${moneda(s.precioUsd)}` : ''}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         ) : (

@@ -30,6 +30,24 @@ export const config = {
 
   // Cada cuánto refrescar la cotización automáticamente (minutos).
   refreshMinutos: 30,
+
+  // -------------------------------------------------------------------
+  //  TCGPlayer: precios por rareza + últimas ventas.
+  //  Sus APIs exigen `Origin: https://www.tcgplayer.com`, que el navegador
+  //  no puede mandar, así que el pedido tiene que pasar por un servidor.
+  //
+  //  - En DEV (npm run dev) lo resuelve el proxy de Vite: dejá `proxyBase`
+  //    vacío y anda solo.
+  //  - PUBLICADO hay que desplegar `worker/tcgplayer-proxy.js` en Cloudflare
+  //    (plan gratis) y poner acá su URL, ej:
+  //      proxyBase: 'https://butapricer-tcg.TUUSUARIO.workers.dev'
+  //  Si queda vacío en producción, la app no rompe: simplemente no muestra
+  //  ventas ni precios por rareza, y avisa por qué.
+  // -------------------------------------------------------------------
+  tcgplayer: {
+    proxyBase: '',
+    ventasVisibles: 12,
+  },
 }
 
 // Las tres páginas que comparamos, en el orden en que se muestran.

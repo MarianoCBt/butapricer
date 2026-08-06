@@ -7,11 +7,19 @@ import {
   resolverConsulta,
 } from './data/ygoprodeck'
 import { casaPorId, leerCache, traerCotizacion } from './data/cotizacion'
+import {
+  buscarImpresiones,
+  emparejarImpresion,
+  promedioVentas,
+  traerVentas,
+} from './data/tcgplayer'
 import { filasDePrecios, resumen as calcularResumen } from './utils/precio'
 import Header from './components/Header'
 import BarraCotizacion from './components/BarraCotizacion'
 import Buscador from './components/Buscador'
 import FichaCarta from './components/FichaCarta'
+import PreciosImpresion from './components/PreciosImpresion'
+import UltimasVentas from './components/UltimasVentas'
 import TablaPrecios from './components/TablaPrecios'
 import PrecioVenta from './components/PrecioVenta'
 import Historial, { guardarEnHistorial, leerHistorial } from './components/Historial'
@@ -140,6 +148,82 @@ export default function App() {
 
   const cambiarImpresion = (clave) => irACarta(carta.id, clave || null)
 
+  // ---- TCGPlayer: precios por rareza + ventas reales ---------------
+  // Va por un proxy (dev: Vite; publicado: Worker). Si no hay proxy todo
+  // esto queda vacío y la app sigue andando con YGOPRODeck.
+  const [impresionesTcg, setImpresionesTcg] = useState([])
+  const [productoTcg, setProductoTcg] = useState(null)
+  const [ventas, setVentas] = useState([])
+  const [cargandoTcg, setCargandoTcg] = useState(false)
+  const [cargandoVentas, setCargandoVentas] = useState(false)
+
+  // Todas las impresiones de la carta en TCGPlayer (una sola vez por carta).
+  useEffect(() => {
+    let vigente = true
+    setImpresionesTcg([])
+    if (!carta?.nombre) return
+    buscarImpresiones(carta.nombre).then((r) => vigente && setImpresionesTcg(r))
+    return () => {
+      vigente = false
+    }
+  }, [carta?.nombre])
+
+  // La impresión elegida -> su producto puntual en TCGPlayer.
+  useEffect(() => {
+    let vigente = true
+    setProductoTcg(null)
+    setVentas([])
+    if (!impresion) return
+    setCargandoTcg(true)
+    emparejarImpresion(impresion, impresionesTcg, carta?.nombre).then((p) => {
+      if (!vigente) return
+      setCargandoTcg(false)
+      setProductoTcg(p)
+    })
+    return () => {
+      vigente = false
+    }
+  }, [impresion, impresionesTcg, carta?.nombre])
+
+  // Y de ese producto, sus últimas ventas cerradas.
+  useEffect(() => {
+    let vigente = true
+    setVentas([])
+    if (!productoTcg?.productId) return
+    setCargandoVentas(true)
+    traerVentas(productoTcg.productId).then((v) => {
+      if (!vigente) return
+      setCargandoVentas(false)
+      setVentas(v)
+    })
+    return () => {
+      vigente = false
+    }
+  }, [productoTcg?.productId])
+
+  // El promedio de ventas sirve para tasar sólo si se compara contra la
+  // misma condición: mezclar Near Mint con Damaged da un número inservible.
+  // Por eso el filtro vive acá y también alimenta el precio sugerido.
+  const [condicionVenta, setCondicionVenta] = useState('todas')
+
+  useEffect(() => {
+    const presentes = new Set(ventas.map((v) => v.condicion))
+    setCondicionVenta(presentes.has('Near Mint') ? 'Near Mint' : 'todas')
+  }, [ventas])
+
+  const ventasFiltradas = useMemo(
+    () =>
+      condicionVenta === 'todas'
+        ? ventas
+        : ventas.filter((v) => v.condicion === condicionVenta),
+    [ventas, condicionVenta],
+  )
+
+  const promedioVentasUsd = useMemo(
+    () => promedioVentas(ventasFiltradas),
+    [ventasFiltradas],
+  )
+
   // ---- Cálculos ---------------------------------------------------
   const filas = useMemo(
     () => (carta ? filasDePrecios(carta, eurUsd, tasaArs) : []),
@@ -187,15 +271,31 @@ export default function App() {
                 onCambiarImpresion={cambiarImpresion}
               />
               <div className="flex flex-col gap-6">
+                <PreciosImpresion
+                  impresion={impresion}
+                  producto={productoTcg}
+                  tasaArs={tasaArs}
+                  cargando={cargandoTcg}
+                />
+                <UltimasVentas
+                  ventas={ventas}
+                  filtradas={ventasFiltradas}
+                  condicion={condicionVenta}
+                  setCondicion={setCondicionVenta}
+                  tasaArs={tasaArs}
+                  cargando={cargandoVentas}
+                  hayProducto={Boolean(productoTcg)}
+                />
                 <TablaPrecios
-                  carta={carta}
                   filas={filas}
                   resumen={resumen}
-                  impresion={impresion}
+                  hayImpresion={Boolean(impresion)}
                 />
                 <PrecioVenta
                   resumen={resumen}
                   impresion={impresion}
+                  productoTcg={productoTcg}
+                  promedioVentasUsd={promedioVentasUsd}
                   tasaArs={tasaArs}
                 />
               </div>

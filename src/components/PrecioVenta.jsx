@@ -40,14 +40,24 @@ function CampoNumero({ etiqueta, sufijo, valor, onChange, paso = 1, min = 0 }) {
  * la impresión elegida, el mínimo o el máximo) y le aplica la regla del
  * negocio: cotización × margen + recargo fijo, redondeado.
  */
-export default function PrecioVenta({ resumen, impresion, tasaArs }) {
+export default function PrecioVenta({
+  resumen,
+  impresion,
+  productoTcg,
+  promedioVentasUsd,
+  tasaArs,
+}) {
   const [reglas, setReglas] = useState(leerReglas)
   const [base, setBase] = useState('media')
 
-  // Si hay una impresión con precio, es la base más precisa.
+  // Elegimos sola la base más confiable que haya disponible:
+  // ventas reales > market de esta impresión > precio de la impresión > media.
   useEffect(() => {
-    setBase(impresion?.precioUsd > 0 ? 'impresion' : 'media')
-  }, [impresion])
+    if (promedioVentasUsd > 0) setBase('ventas')
+    else if (productoTcg?.market > 0) setBase('market')
+    else if (impresion?.precioUsd > 0) setBase('impresion')
+    else setBase('media')
+  }, [promedioVentasUsd, productoTcg, impresion])
 
   useEffect(() => {
     try {
@@ -57,19 +67,30 @@ export default function PrecioVenta({ resumen, impresion, tasaArs }) {
     }
   }, [reglas])
 
+  // De más confiable a menos: las ventas reales primero.
   const bases = useMemo(
     () =>
       [
-        { id: 'media', label: 'Media', usd: resumen.mediaUsd },
+        promedioVentasUsd > 0 && {
+          id: 'ventas',
+          label: 'Ventas reales',
+          usd: promedioVentasUsd,
+        },
+        productoTcg?.market > 0 && {
+          id: 'market',
+          label: 'Market',
+          usd: productoTcg.market,
+        },
         impresion?.precioUsd > 0 && {
           id: 'impresion',
           label: 'Esta impresión',
           usd: impresion.precioUsd,
         },
+        { id: 'media', label: 'Media 3 páginas', usd: resumen.mediaUsd },
         { id: 'min', label: 'Más barato', usd: resumen.minUsd },
         { id: 'max', label: 'Más caro', usd: resumen.maxUsd },
       ].filter(Boolean),
-    [resumen, impresion],
+    [resumen, impresion, productoTcg, promedioVentasUsd],
   )
 
   const baseActiva = bases.find((b) => b.id === base) || bases[0]

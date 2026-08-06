@@ -16,15 +16,15 @@ function Punto({ color }) {
  * el mismo valor en USD y en ARS según la cotización elegida. Abajo, el
  * promedio y el rango.
  */
-export default function TablaPrecios({ filas, resumen, impresion, carta }) {
+export default function TablaPrecios({ filas, resumen, hayImpresion }) {
   return (
     <section className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
       <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--color-border)] px-4 py-3">
         <h3 className="font-semibold text-[var(--color-ink)]">
-          Precios de referencia
+          Precio general de la carta
         </h3>
         <p className="text-xs text-[var(--color-muted)]">
-          Menor precio publicado por página · toda la carta
+          Menor precio por página · todas las rarezas juntas
         </p>
       </div>
 
@@ -127,38 +127,6 @@ export default function TablaPrecios({ filas, resumen, impresion, carta }) {
 
       {/* La impresión elegida es el dato más fino que da la API: el precio
           de TCGPlayer para ese código + rareza puntual. */}
-      {impresion && (
-        <div className="border-t border-[var(--color-border)] bg-[var(--color-brand-light)]/40 px-4 py-3">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-[var(--color-muted)]">
-                Esta impresión · TCGPlayer
-              </p>
-              <p className="truncate text-sm text-[var(--color-ink)]">
-                {impresion.codigo}
-                {impresion.rareza && ` · ${impresion.rareza}`}
-              </p>
-            </div>
-            <p className="tabular text-right">
-              {impresion.precioUsd > 0 ? (
-                <>
-                  <span className="text-sm text-[var(--color-muted)]">
-                    {moneda(impresion.precioUsd)}
-                  </span>
-                  <span className="ml-3 text-base font-bold text-[var(--color-ink)]">
-                    {ars(impresion.ars)}
-                  </span>
-                </>
-              ) : (
-                <span className="text-sm text-[var(--color-muted)]">
-                  Sin precio publicado para esta impresión
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Qué es cada número. Va explícito para no tomar decisiones de precio
           sobre un supuesto equivocado. */}
       <ul className="space-y-1 border-t border-[var(--color-border)] px-4 py-3 text-xs text-[var(--color-muted)]">
@@ -171,10 +139,11 @@ export default function TablaPrecios({ filas, resumen, impresion, carta }) {
           </li>
         ))}
         <li className="pt-1">
-          Fuente: YGOPRODeck. No publica historial de ventas cerradas; estos son
-          precios de lista vigentes
-          {carta?.nombre && ' — hacé clic en cada página para ver las ventas reales'}
-          .
+          Fuente: YGOPRODeck. Son precios de lista de la carta en general, sin
+          separar por rareza
+          {hayImpresion
+            ? ' — para tasar, mirá el bloque de arriba, que sí es de esta impresión.'
+            : ' — elegí una impresión para ver los precios de esa rareza.'}
         </li>
       </ul>
     </section>
