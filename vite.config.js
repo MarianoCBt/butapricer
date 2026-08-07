@@ -11,9 +11,9 @@ import tailwindcss from '@tailwindcss/vite'
 //  directo. El proxy de Vite corre del lado del servidor (Node), donde CORS
 //  no aplica y sí se pueden mandar esos headers.
 //
-//  Para que esto ande PUBLICADO hace falta el mismo reenvío en un servidor:
-//  está en `worker/tcgplayer-proxy.js` (Cloudflare Worker, plan gratis).
-//  Ver `config.tcgplayer.proxyBase`.
+//  Para que esto ande PUBLICADO hace falta el mismo reenvío en un servidor
+//  propio (p. ej. un Cloudflare Worker), que no está en este repo. Ver el
+//  README, sección "Precios en vivo", y `config.tcgplayer.proxyBase`.
 // ---------------------------------------------------------------------
 const CABECERAS_TCG = {
   'User-Agent':

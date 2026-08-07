@@ -13,7 +13,7 @@
 //  y exigen ese mismo `Origin` en el pedido (si no, 403). El navegador no
 //  puede falsificar `Origin`, así que el pedido tiene que salir de un
 //  servidor. En dev lo hace el proxy de Vite (ver vite.config.js); publicado,
-//  el Worker de `worker/tcgplayer-proxy.js`.
+//  un proxy propio (ver README, "Precios en vivo").
 //
 //  Si no hay proxy disponible, TODO acá devuelve null / lista vacía y la app
 //  sigue andando con los datos de YGOPRODeck. Nunca tira error a la UI.

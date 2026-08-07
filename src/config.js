@@ -39,8 +39,8 @@ export const config = {
   //
   //  - En DEV (npm run dev) lo resuelve el proxy de Vite: dejá `proxyBase`
   //    vacío y anda solo.
-  //  - PUBLICADO hay que desplegar `worker/tcgplayer-proxy.js` en Cloudflare
-  //    (plan gratis) y poner acá su URL, ej:
+  //  - PUBLICADO hace falta un proxy propio (p. ej. un Cloudflare Worker;
+  //    no está en este repo) y poner acá su URL, ej:
   //      proxyBase: 'https://butapricer-tcg.TUUSUARIO.workers.dev'
   //  Si queda vacío en producción, la app no rompe: simplemente no muestra
   //  ventas ni precios por rareza, y avisa por qué.
