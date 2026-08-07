@@ -85,6 +85,10 @@ export const TIENDAS = [
     id: 'cardmarket',
     label: 'CardMarket',
     logos: logos('cardmarket'),
+    // El logo que tenemos es la versión oscura: sobre el fondo del botón
+    // (#1e2533) queda casi invisible. Se le pone una pastilla clara detrás.
+    // Si algún día conseguís la versión blanca, borrá esta línea.
+    fondoClaro: true,
     color: 'var(--color-mkt)',
     url: (nombre) =>
       `https://www.cardmarket.com/en/YuGiOh/Products/Search?searchString=${encodeURIComponent(nombre)}`,

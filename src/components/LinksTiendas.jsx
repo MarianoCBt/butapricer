@@ -10,6 +10,7 @@ import { TIENDAS } from '../config'
  */
 function Logo({ tienda }) {
   const [intento, setIntento] = useState(0)
+  const [cuadrado, setCuadrado] = useState(false)
   const candidatos = tienda.logos || []
   const src = candidatos[intento]
 
@@ -20,11 +21,22 @@ function Logo({ tienda }) {
       </span>
     )
   }
+
   return (
     <img
       src={src}
       alt={tienda.label}
-      className="h-5 w-auto max-w-28 object-contain"
+      // Los logos vienen en dos formas: banderas anchas (el nombre escrito) e
+      // isotipos cuadrados. Con la misma altura el cuadrado queda diminuto al
+      // lado de uno ancho, así que se le da un poco más de alto para que
+      // pesen parecido.
+      className={`w-auto max-w-28 object-contain ${cuadrado ? 'h-6' : 'h-5'} ${
+        tienda.fondoClaro ? 'rounded bg-white/90 px-1 py-0.5' : ''
+      }`}
+      onLoad={(e) => {
+        const { naturalWidth: w, naturalHeight: h } = e.currentTarget
+        if (h > 0) setCuadrado(w / h < 1.6)
+      }}
       onError={() => setIntento((i) => i + 1)}
     />
   )

@@ -10,7 +10,7 @@ sirve:
 |--------------------------------------|--------------|--------|
 | `tcgplayer.svg` o `tcgplayer.png`    | TCGPlayer    | ✅ png |
 | `coolstuffinc.svg` o `.png`          | CoolStuffInc | ✅ png |
-| `cardmarket.svg` o `.png`            | CardMarket   | ❌ falta |
+| `cardmarket.svg` o `.png`            | CardMarket   | ✅ png (versión oscura, ver abajo) |
 
 ## Reglas
 
@@ -19,10 +19,15 @@ sirve:
 - **SVG** es lo ideal: nítido en cualquier pantalla y pesa nada. Si es PNG, que
   sea **con fondo transparente** y de al menos 2x el tamaño final (se muestran
   a 20px de alto, así que ~40-60px de alto alcanza).
-- **El sitio es oscuro**: un logo negro sobre `#0d1018` no se ve. Si tenés
-  dudas, mirá el logo puesto y fijate que se lea.
-- Se muestran con `object-contain` a 20px de alto y hasta 112px de ancho, así
-  que la proporción no importa.
+- **El sitio es oscuro**: un logo negro sobre `#0d1018` no se ve. Si sólo
+  conseguís la versión oscura, poné `fondoClaro: true` en esa tienda en
+  `src/config.js`: le pone una pastilla blanca detrás. Es lo que está hecho
+  con CardMarket — si algún día conseguís la versión blanca, borrá esa línea.
+- Los **isotipos cuadrados** (como el de CardMarket) se dibujan un poco más
+  grandes que los logos anchos, para que no queden diminutos al lado. Eso se
+  detecta solo por la proporción del archivo, no hay que configurar nada.
+- Se muestran con `object-contain` a 20px de alto (24px los cuadrados) y hasta
+  112px de ancho, así que la proporción no importa.
 
 ## Si falta alguno
 
