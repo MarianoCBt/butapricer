@@ -62,13 +62,24 @@ export const config = {
 // ---------------------------------------------------------------------
 const asset = (f) => import.meta.env.BASE_URL + f
 
+// Dos cosas distintas y no intercambiables:
+//  - `logos`: la bandera ancha con el nombre escrito. Va sola (bloque
+//    "Comparar en"): poner el nombre al lado quedaría duplicado.
+//  - `iconos`: el isotipo cuadrado, normalmente el favicon del sitio. Va
+//    ACOMPAÑANDO al nombre en los encabezados que declaran la fuente.
 const logos = (id) => [asset(`tiendas/${id}.svg`), asset(`tiendas/${id}.png`)]
+const iconos = (id) => [
+  asset(`tiendas/${id}.ico`),
+  asset(`tiendas/${id}-icono.svg`),
+  asset(`tiendas/${id}-icono.png`),
+]
 
 export const TIENDAS = [
   {
     id: 'tcgplayer',
     label: 'TCGPlayer',
     logos: logos('tcgplayer'),
+    iconos: iconos('tcgplayer'),
     color: 'var(--color-tcg)',
     url: (nombre) =>
       `https://www.tcgplayer.com/search/yugioh/product?productLineName=yugioh&q=${encodeURIComponent(nombre)}`,
@@ -77,6 +88,7 @@ export const TIENDAS = [
     id: 'coolstuffinc',
     label: 'CoolStuffInc',
     logos: logos('coolstuffinc'),
+    iconos: iconos('coolstuffinc'),
     color: 'var(--color-csi)',
     url: (nombre) =>
       `https://www.coolstuffinc.com/main_search.php?pa=searchOnName&page=1&q=${encodeURIComponent(nombre)}`,
@@ -85,6 +97,7 @@ export const TIENDAS = [
     id: 'cardmarket',
     label: 'CardMarket',
     logos: logos('cardmarket'),
+    iconos: iconos('cardmarket'),
     // El logo que tenemos es la versión oscura: sobre el fondo del botón
     // (#1e2533) queda casi invisible. Se le pone una pastilla clara detrás.
     // Si algún día conseguís la versión blanca, borrá esta línea.

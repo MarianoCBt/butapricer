@@ -64,9 +64,10 @@ export default function UltimasVentas({
           Operaciones cerradas en
           <LogoTienda
             tienda={tiendaPorId('tcgplayer')}
-            alto="h-4"
-            altoCuadrado="h-5"
-            claseTexto="font-semibold"
+            icono
+            conTexto
+            altoCuadrado="h-4"
+            claseTexto="font-semibold text-[var(--color-ink)]"
           />
         </p>
       </div>

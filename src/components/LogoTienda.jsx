@@ -6,49 +6,66 @@ export function tiendaPorId(id) {
 }
 
 /**
- * Logo de una tienda, con el nombre en texto como respaldo.
+ * Marca de una tienda. Dos variantes, que NO son intercambiables:
  *
- * `tienda.logos` son candidatos (.svg y .png): si uno no está se prueba el
- * siguiente, y si no hay ninguno se muestra el nombre. Así da igual en qué
- * formato se guarde el archivo y la app nunca queda con un ícono roto.
+ *  - por defecto (`logos`): la bandera ancha con el nombre escrito. Va sola,
+ *    en el bloque "Comparar en"; poner el nombre al lado quedaría duplicado.
+ *  - `icono` (`iconos`, normalmente el favicon del sitio): el isotipo
+ *    cuadrado. Se usa con `conTexto` para acompañar al nombre en los
+ *    encabezados que declaran de dónde salen los datos.
  *
- * `alto` en clases de Tailwind. Los logos vienen en dos formas: banderas
- * anchas (el nombre escrito) e isotipos cuadrados; con la misma altura el
- * cuadrado queda diminuto al lado de uno ancho, así que se le da un poco más.
- * Se detecta solo por la proporción del archivo.
+ * En las dos, las fuentes son CANDIDATOS: si un archivo no está se prueba el
+ * siguiente, y si no hay ninguno queda el nombre en texto. Así la fuente
+ * siempre se lee, con imagen o sin ella, y nunca queda un ícono roto.
  */
 export default function LogoTienda({
   tienda,
+  icono = false,
+  conTexto = false,
   alto = 'h-5',
   altoCuadrado = 'h-6',
   claseTexto = 'font-semibold',
 }) {
   const [intento, setIntento] = useState(0)
-  const [cuadrado, setCuadrado] = useState(false)
+  const [cuadrado, setCuadrado] = useState(icono)
 
   if (!tienda) return null
-  const src = (tienda.logos || [])[intento]
 
-  if (!src) {
-    return (
-      <span className={claseTexto} style={{ color: tienda.color }}>
-        {tienda.label}
-      </span>
-    )
-  }
+  const fuentes = (icono ? tienda.iconos : tienda.logos) || []
+  const src = fuentes[intento]
 
-  return (
+  const texto = (
+    <span className={claseTexto} style={src && conTexto ? undefined : { color: tienda.color }}>
+      {tienda.label}
+    </span>
+  )
+
+  if (!src) return texto
+
+  const img = (
     <img
       src={src}
-      alt={tienda.label}
-      className={`w-auto max-w-28 object-contain ${cuadrado ? altoCuadrado : alto} ${
-        tienda.fondoClaro ? 'rounded bg-white/90 px-1 py-0.5' : ''
-      }`}
+      alt={conTexto ? '' : tienda.label}
+      // Los logos anchos y los isotipos cuadrados no pueden ir a la misma
+      // altura: el cuadrado quedaría diminuto al lado de uno ancho. Se
+      // detecta solo por la proporción del archivo.
+      className={`w-auto max-w-28 shrink-0 object-contain ${
+        cuadrado ? altoCuadrado : alto
+      } ${tienda.fondoClaro && !icono ? 'rounded bg-white/90 px-1 py-0.5' : ''}`}
       onLoad={(e) => {
         const { naturalWidth: w, naturalHeight: h } = e.currentTarget
         if (h > 0) setCuadrado(w / h < 1.6)
       }}
       onError={() => setIntento((i) => i + 1)}
     />
+  )
+
+  if (!conTexto) return img
+
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      {img}
+      {texto}
+    </span>
   )
 }

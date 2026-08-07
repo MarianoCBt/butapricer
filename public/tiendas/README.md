@@ -1,6 +1,26 @@
 # Logos de las tiendas
 
-Dejá acá los logos que se muestran en el bloque **“Comparar en”** de cada carta.
+Hay **dos usos distintos** y conviene tener los dos archivos:
+
+- **Logo ancho** (el nombre escrito): va **solo**, en los botones del bloque
+  **“Comparar en”**. Por eso ahí no se repite el nombre al lado.
+- **Ícono cuadrado** (sirve el **favicon** del sitio, `.ico`): va
+  **acompañando al nombre** en los encabezados que dicen de dónde salen los
+  datos (“Esta impresión · TCGPlayer”, “Operaciones cerradas en TCGPlayer”).
+
+## Íconos
+
+| Archivo             | Tienda       | ¿Está? |
+|---------------------|--------------|--------|
+| `tcgplayer.ico`     | TCGPlayer    | ✅ |
+| `coolstuffinc.ico`  | CoolStuffInc | ❌ |
+| `cardmarket.ico`    | CardMarket   | ❌ |
+
+También acepta `<tienda>-icono.svg` o `<tienda>-icono.png` si no tenés el
+`.ico`. Se bajan del favicon del sitio (`https://www.tcgplayer.com/favicon.ico`
+y equivalentes). Si falta, el encabezado muestra sólo el nombre.
+
+## Logos anchos
 
 Nombres que busca la app (definidos en `src/config.js` → `TIENDAS`). Para cada
 tienda prueba primero `.svg` y después `.png`, así que cualquiera de los dos
@@ -23,9 +43,10 @@ sirve:
   conseguís la versión oscura, poné `fondoClaro: true` en esa tienda en
   `src/config.js`: le pone una pastilla blanca detrás. Es lo que está hecho
   con CardMarket — si algún día conseguís la versión blanca, borrá esa línea.
-- Los **isotipos cuadrados** (como el de CardMarket) se dibujan un poco más
-  grandes que los logos anchos, para que no queden diminutos al lado. Eso se
-  detecta solo por la proporción del archivo, no hay que configurar nada.
+- Si el archivo que conseguiste es **cuadrado** (como el de CardMarket, que es
+  el isotipo y no la bandera), se dibuja un poco más grande para que no quede
+  diminuto al lado de uno ancho. Se detecta solo por la proporción, no hay que
+  configurar nada.
 - Se muestran con `object-contain` a 20px de alto (24px los cuadrados) y hasta
   112px de ancho, así que la proporción no importa.
 
