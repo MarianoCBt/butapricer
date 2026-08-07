@@ -1,5 +1,6 @@
 import FilaPrecio from './FilaPrecio'
 import LogoTienda, { tiendaPorId } from './LogoTienda'
+import { moneda } from '../utils/format'
 import { rarezaColor } from '../utils/rareza'
 
 /**
@@ -11,6 +12,14 @@ import { rarezaColor } from '../utils/rareza'
  */
 export default function PreciosImpresion({ impresion, producto, tasaArs, cargando }) {
   if (!impresion) return null
+
+  // El total más barato ya con envío, y cuánto suma respecto del listado
+  // más barato. Si la API no manda el total con envío, se usa el listado.
+  const total = producto?.lowestConEnvio || producto?.lowest || 0
+  const masBarato = {
+    total,
+    envio: producto?.lowest > 0 ? Math.max(0, total - producto.lowest) : 0,
+  }
 
   return (
     <section className="overflow-hidden rounded-xl border border-[var(--color-brand)]/40 bg-[var(--color-surface)]">
@@ -59,9 +68,21 @@ export default function PreciosImpresion({ impresion, producto, tasaArs, cargand
               usd={producto.median}
               tasaArs={tasaArs}
             />
+            {/* En cartas baratas el envío pesa más que la carta, así que el
+                número grande es el TOTAL puesto en tu casa y el desglose va
+                abajo. Ver `lowestConEnvio` en tcgplayer.js: los dos precios
+                pueden salir de vendedores distintos, por eso se dice "de
+                envío" y no "envío del vendedor". */}
             <FilaPrecio
-              titulo="Más barato listado"
-              usd={producto.lowest}
+              titulo="Más barato"
+              subtitulo={
+                masBarato.envio > 0
+                  ? `${moneda(producto.lowest)} + ${moneda(masBarato.envio)} de envío`
+                  : producto.lowest > 0
+                    ? 'envío incluido'
+                    : null
+              }
+              usd={masBarato.total}
               tasaArs={tasaArs}
             />
           </ul>

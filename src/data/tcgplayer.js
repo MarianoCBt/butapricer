@@ -89,6 +89,12 @@ function mapearProducto(p) {
     market: num(p.marketPrice),
     median: num(p.medianPrice),
     lowest: num(p.lowestPrice),
+    // `lowestPriceWithShipping` es el TOTAL más barato entre todas las
+    // publicaciones ya con el envío sumado. Ojo: puede venir de un vendedor
+    // distinto que el de `lowest` (vimos $0,01 sin envío contra $0,15 con
+    // envío), así que la resta es la DIFERENCIA hasta el más barato puesto
+    // en tu casa, no la tarifa que cobra ese vendedor.
+    lowestConEnvio: num(p.lowestPriceWithShipping),
     listados: p.totalListings || 0,
     url: p.productUrlName
       ? `https://www.tcgplayer.com/product/${p.productId}/${p.productUrlName}`
