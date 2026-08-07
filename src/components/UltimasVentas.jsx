@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import FilaPrecio from './FilaPrecio'
+import LogoTienda, { tiendaPorId } from './LogoTienda'
 import { promedioVentas } from '../data/tcgplayer'
 import { config } from '../config'
 
@@ -59,8 +60,14 @@ export default function UltimasVentas({
     <section className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-[var(--color-border)] px-4 py-3">
         <h3 className="font-semibold text-[var(--color-ink)]">Últimas ventas</h3>
-        <p className="text-xs text-[var(--color-muted)]">
-          Operaciones cerradas en TCGPlayer
+        <p className="flex items-center gap-1.5 text-xs text-[var(--color-muted)]">
+          Operaciones cerradas en
+          <LogoTienda
+            tienda={tiendaPorId('tcgplayer')}
+            alto="h-4"
+            altoCuadrado="h-5"
+            claseTexto="font-semibold"
+          />
         </p>
       </div>
 

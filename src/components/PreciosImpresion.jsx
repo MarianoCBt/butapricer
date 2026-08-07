@@ -1,4 +1,5 @@
 import FilaPrecio from './FilaPrecio'
+import LogoTienda, { tiendaPorId } from './LogoTienda'
 import { rarezaColor } from '../utils/rareza'
 
 /**
@@ -14,9 +15,18 @@ export default function PreciosImpresion({ impresion, producto, tasaArs, cargand
   return (
     <section className="overflow-hidden rounded-xl border border-[var(--color-brand)]/40 bg-[var(--color-surface)]">
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-[var(--color-border)] bg-[var(--color-brand-light)]/40 px-4 py-3">
-        <h3 className="font-semibold text-[var(--color-ink)]">
-          Esta impresión{' '}
-          <span className="font-normal text-[var(--color-muted)]">· TCGPlayer</span>
+        {/* La fuente se declara con el logo: el archivo es el nombre escrito,
+            así que repetir "TCGPlayer" al lado quedaría duplicado. Si el logo
+            falta, LogoTienda cae al nombre en texto. */}
+        <h3 className="flex items-center gap-2 font-semibold text-[var(--color-ink)]">
+          Esta impresión
+          <span className="font-normal text-[var(--color-muted)]">·</span>
+          <LogoTienda
+            tienda={tiendaPorId('tcgplayer')}
+            alto="h-4"
+            altoCuadrado="h-5"
+            claseTexto="font-normal"
+          />
         </h3>
         <p className="flex items-center gap-2 text-sm">
           <span className="tabular text-[var(--color-muted)]">{impresion.codigo}</span>

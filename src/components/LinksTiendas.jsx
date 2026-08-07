@@ -1,46 +1,5 @@
-import { useState } from 'react'
 import { TIENDAS } from '../config'
-
-/**
- * Logo de la tienda, con el nombre en texto como respaldo.
- *
- * `tienda.logos` son candidatos (.svg y .png): si uno no está, se prueba el
- * siguiente, y si no hay ninguno se muestra el nombre. Así da igual en qué
- * formato se guarde el archivo y la app nunca queda con un ícono roto.
- */
-function Logo({ tienda }) {
-  const [intento, setIntento] = useState(0)
-  const [cuadrado, setCuadrado] = useState(false)
-  const candidatos = tienda.logos || []
-  const src = candidatos[intento]
-
-  if (!src) {
-    return (
-      <span className="font-semibold" style={{ color: tienda.color }}>
-        {tienda.label}
-      </span>
-    )
-  }
-
-  return (
-    <img
-      src={src}
-      alt={tienda.label}
-      // Los logos vienen en dos formas: banderas anchas (el nombre escrito) e
-      // isotipos cuadrados. Con la misma altura el cuadrado queda diminuto al
-      // lado de uno ancho, así que se le da un poco más de alto para que
-      // pesen parecido.
-      className={`w-auto max-w-28 object-contain ${cuadrado ? 'h-6' : 'h-5'} ${
-        tienda.fondoClaro ? 'rounded bg-white/90 px-1 py-0.5' : ''
-      }`}
-      onLoad={(e) => {
-        const { naturalWidth: w, naturalHeight: h } = e.currentTarget
-        if (h > 0) setCuadrado(w / h < 1.6)
-      }}
-      onError={() => setIntento((i) => i + 1)}
-    />
-  )
-}
+import LogoTienda from './LogoTienda'
 
 /**
  * Links para comparar la carta a mano en las otras páginas.
@@ -72,7 +31,7 @@ export default function LinksTiendas({ carta, producto }) {
                 rel="noreferrer noopener"
                 className="flex min-h-11 items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-sm text-[var(--color-muted)] transition-colors duration-150 hover:border-[var(--color-brand)] hover:text-[var(--color-ink)]"
               >
-                <Logo tienda={t} />
+                <LogoTienda tienda={t} />
                 <span aria-hidden="true" className="text-xs">
                   ↗
                 </span>
