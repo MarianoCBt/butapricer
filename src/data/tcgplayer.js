@@ -26,6 +26,13 @@ const base = () => (config.tcgplayer.proxyBase || '').replace(/\/$/, '')
 
 const cache = new Map()
 
+// ¿Hay proxy? `null` = todavía no sabemos.
+// Importa distinguirlo de "esta impresión no está en TCGPlayer": publicado
+// sin worker, TODAS las cartas se quedarían sin precio y la UI diría que no
+// las encontró, que es falso. Con esto puede decir la verdad.
+let proxyOk = null
+export const hayProxy = () => proxyOk
+
 async function pedir(url, cuerpo) {
   const clave = url + JSON.stringify(cuerpo || null)
   if (cache.has(clave)) return cache.get(clave)
@@ -35,8 +42,16 @@ async function pedir(url, cuerpo) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(cuerpo || {}),
     })
-    if (!res.ok) return null // 4xx/5xx: puede ser pasajero, no lo cacheamos
+    // Sin proxy, la ruta /tcg/... no existe: un hosting estático devuelve
+    // 404 o el index.html. En los dos casos no es JSON.
+    const tipo = res.headers.get('content-type') || ''
+    if (res.status === 404 || res.status === 405 || !tipo.includes('json')) {
+      proxyOk = false
+      return null
+    }
+    if (!res.ok) return null // 4xx/5xx de TCGPlayer: puede ser pasajero
     const datos = await res.json().catch(() => null)
+    if (datos) proxyOk = true
     // Sólo se cachea una respuesta buena. Cachear los fallos hacía que un
     // error pasajero dejara la carta sin ventas por el resto de la sesión.
     if (datos) cache.set(clave, datos)

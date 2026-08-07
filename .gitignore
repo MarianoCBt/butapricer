@@ -4,6 +4,14 @@ dist-ssr
 *.local
 .vite
 
+# Notas internas y config de herramientas (no van al repo público)
+CLAUDE.md
+.claude/
+
+# El proxy de TCGPlayer se mantiene fuera del repo a propósito.
+# Ver README (sección "Precios en vivo").
+worker/
+
 # Editor
 .vscode/*
 !.vscode/extensions.json

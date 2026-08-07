@@ -1,6 +1,7 @@
 import FilaPrecio from './FilaPrecio'
 import LogoTienda, { tiendaPorId } from './LogoTienda'
 import { moneda } from '../utils/format'
+import { hayProxy } from '../data/tcgplayer'
 import { rarezaColor } from '../utils/rareza'
 
 /**
@@ -94,6 +95,15 @@ export default function PreciosImpresion({ impresion, producto, tasaArs, cargand
               : 'Sin publicaciones activas'}
           </p>
         </>
+      ) : hayProxy() === false ? (
+        /* Sin proxy no hay precios de ninguna carta. Decirlo así y no
+           "no encontré esta impresión", que sería falso. */
+        <p className="px-4 py-4 text-sm text-[var(--color-muted)]">
+          Los precios en vivo no están disponibles en esta versión. Se necesita
+          el proxy de TCGPlayer configurado (ver{' '}
+          <code className="text-[var(--color-ink)]">tcgplayer.proxyBase</code> en
+          la configuración).
+        </p>
       ) : (
         <p className="px-4 py-4 text-sm text-[var(--color-muted)]">
           No encontré esta impresión en TCGPlayer. Puede ser que la listen con
