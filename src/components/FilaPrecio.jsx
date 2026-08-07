@@ -15,8 +15,6 @@ export default function FilaPrecio({
   etiqueta,
   color,
   usd,
-  original,
-  monedaOriginal,
   tasaArs,
   destacado = false,
   href,
@@ -78,19 +76,15 @@ export default function FilaPrecio({
         >
           {hayDato ? fmtArs(usd * tasaArs) : '—'}
         </p>
-        <p className="tabular mt-0.5 text-xs text-[var(--color-muted)]">
-          {hayDato ? (
-            <>
-              {moneda(usd)}
-              {/* Sólo mostramos la moneda original si no era dólar (CardMarket
-                  publica en euros): repetir "US$ 0,27 · US$ 0,27" no aporta. */}
-              {monedaOriginal && monedaOriginal !== 'USD' && original > 0 && (
-                <span className="ml-1">({moneda(original, monedaOriginal)})</span>
-              )}
-            </>
-          ) : (
-            'sin dato'
-          )}
+        {/* El USD es la referencia real —el precio en pesos sale de
+            multiplicarlo por la cotización del momento—, así que va
+            destacado en verde y no como texto secundario gris. */}
+        <p
+          className={`tabular mt-0.5 font-medium ${
+            hayDato ? 'text-sm text-[var(--color-usd)]' : 'text-xs text-[var(--color-muted)]'
+          }`}
+        >
+          {hayDato ? moneda(usd) : 'sin dato'}
         </p>
       </div>
     </li>

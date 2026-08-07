@@ -58,6 +58,43 @@ export function useLista() {
     setItems((prev) => prev.filter((i) => i.id !== id))
   }, [])
 
+  /** Corrige a mano el precio de una carta ya cargada. */
+  const cambiarPrecio = useCallback((id, precioArs) => {
+    setItems((prev) =>
+      prev.map((i) =>
+        i.id === id ? { ...i, precioArs: Math.max(0, Number(precioArs) || 0) } : i,
+      ),
+    )
+  }, [])
+
+  /**
+   * Redondea todos los precios al múltiplo más cercano (por defecto $100),
+   * para no andar cobrando $1.068. Se guarda el precio previo por si se
+   * quiere volver atrás sin rehacer la lista.
+   */
+  const redondear = useCallback((multiplo = 100) => {
+    setItems((prev) =>
+      prev.map((i) => {
+        const previo = Number(i.precioArs) || 0
+        return {
+          ...i,
+          precioArs: Math.round(previo / multiplo) * multiplo,
+          precioPrevio: previo,
+        }
+      }),
+    )
+  }, [])
+
+  const deshacerRedondeo = useCallback(() => {
+    setItems((prev) =>
+      prev.map(({ precioPrevio, ...i }) =>
+        precioPrevio === undefined ? i : { ...i, precioArs: precioPrevio },
+      ),
+    )
+  }, [])
+
+  const hayRedondeo = items.some((i) => i.precioPrevio !== undefined)
+
   const vaciar = useCallback(() => {
     setItems([])
     setDescuento(0)
@@ -76,6 +113,10 @@ export function useLista() {
     agregar,
     quitar,
     vaciar,
+    cambiarPrecio,
+    redondear,
+    deshacerRedondeo,
+    hayRedondeo,
     descuento,
     setDescuento,
     subtotal,

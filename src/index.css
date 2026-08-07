@@ -24,6 +24,11 @@
   --color-csi: #f0a13b;
   --color-mkt: #57c99a;
 
+  /* Verde "dólar": el precio en USD es la referencia real (el de pesos sale
+     de multiplicarlo), así que se destaca en vez de quedar como texto gris.
+     7,9:1 sobre --color-surface-2, bastante arriba del 4,5:1 de AA. */
+  --color-usd: #5ecf9a;
+
   /* Colores por rareza (compartidos con ButaTCG) */
   --rar-common: #b3bccc;
   --rar-super: #7fc4e8;

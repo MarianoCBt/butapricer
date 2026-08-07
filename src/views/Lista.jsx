@@ -2,13 +2,23 @@ import { ars } from '../utils/format'
 import { rarezaColor } from '../utils/rareza'
 
 /**
- * La lista armada: una línea por carta con su precio, el descuento
- * opcional y el total. Nada más — no es una calculadora de márgenes.
+ * La lista armada: una línea por carta con su precio (editable), el
+ * descuento opcional y el total. Nada más — no es una calculadora de
+ * márgenes.
+ *
+ * Acá NO se muestra la barra de cotización: los precios ya están congelados
+ * en pesos desde que se agregaron, y tenerla arriba hacía pensar que
+ * cambiando el dólar cambiaban los precios de la lista. Si hay que corregir
+ * uno, se edita a mano en su fila.
  */
 export default function Lista({
   items,
   quitar,
   vaciar,
+  cambiarPrecio,
+  redondear,
+  deshacerRedondeo,
+  hayRedondeo,
   descuento,
   setDescuento,
   subtotal,
@@ -39,20 +49,38 @@ export default function Lista({
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold text-[var(--color-ink)]">
           Lista
           <span className="ml-2 text-sm font-normal text-[var(--color-muted)]">
             {items.length} {items.length === 1 ? 'carta' : 'cartas'}
           </span>
         </h1>
-        <button
-          type="button"
-          onClick={vaciar}
-          className="min-h-9 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-muted)] transition-colors duration-150 hover:border-red-500/60 hover:text-red-400"
-        >
-          Vaciar lista
-        </button>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => (hayRedondeo ? deshacerRedondeo() : redondear(100))}
+            title={
+              hayRedondeo
+                ? 'Volver a los precios sin redondear'
+                : 'Redondear todos los precios al múltiplo de $100 más cercano'
+            }
+            className="flex min-h-9 items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-muted)] transition-colors duration-150 hover:border-[var(--color-brand)] hover:text-[var(--color-ink)]"
+          >
+            <span aria-hidden="true">{hayRedondeo ? '↩️' : '🔢'}</span>
+            {hayRedondeo ? 'Deshacer' : 'Redondear'}
+          </button>
+
+          <button
+            type="button"
+            onClick={vaciar}
+            className="flex min-h-9 items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-muted)] transition-colors duration-150 hover:border-red-500/60 hover:text-red-400"
+          >
+            <span aria-hidden="true">🗑️</span>
+            Vaciar
+          </button>
+        </div>
       </div>
 
       <ul className="divide-y divide-[var(--color-border)] overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -81,15 +109,26 @@ export default function Lista({
               </p>
             </div>
 
-            <span className="tabular shrink-0 font-semibold text-[var(--color-ink)]">
-              {ars(i.precioArs)}
-            </span>
+            {/* Precio editable: si en el mostrador se acuerda otro número, se
+                corrige acá sin tener que borrar la carta y volver a cargarla. */}
+            <label className="flex shrink-0 items-center gap-1">
+              <span className="text-sm text-[var(--color-muted)]">$</span>
+              <input
+                type="number"
+                min={0}
+                step={100}
+                value={i.precioArs || ''}
+                onChange={(e) => cambiarPrecio(i.id, e.target.value)}
+                aria-label={`Precio de ${i.nombre}`}
+                className="tabular min-h-9 w-24 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2 py-1.5 text-right font-semibold text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-brand)] focus:border-[var(--color-brand)]"
+              />
+            </label>
 
             <button
               type="button"
               onClick={() => quitar(i.id)}
               aria-label={`Quitar ${i.nombre}`}
-              className="-mr-1 min-h-9 shrink-0 rounded-md px-2.5 py-2 text-[var(--color-muted)] transition-colors duration-150 hover:text-red-400"
+              className="-mr-1 min-h-9 shrink-0 rounded-md px-2 py-2 text-[var(--color-muted)] transition-colors duration-150 hover:text-red-400"
             >
               ✕
             </button>

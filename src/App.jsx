@@ -21,6 +21,7 @@ import PreciosImpresion from './components/PreciosImpresion'
 import UltimasVentas from './components/UltimasVentas'
 import LinksTiendas from './components/LinksTiendas'
 import ModalPrecio from './components/ModalPrecio'
+import Footer from './components/Footer'
 import Lista from './views/Lista'
 import Historial, { guardarEnHistorial, leerHistorial } from './components/Historial'
 
@@ -274,6 +275,10 @@ export default function App() {
           onLista={() => (window.location.hash = '#lista')}
           cantidadLista={lista.cantidad}
         />
+        {/* En la lista no va: los precios ya están congelados en pesos desde
+            que se agregaron, y tener el selector de dólar arriba hacía creer
+            que cambiándolo cambiaban los precios de la lista. */}
+        {!enLista && (
         <BarraCotizacion
           cotizacion={cotizacion}
           casaId={casaId}
@@ -287,6 +292,7 @@ export default function App() {
           cargando={cargandoCotiz}
           onRefrescar={refrescarCotizacion}
         />
+        )}
       </div>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-4 md:py-6">
@@ -295,6 +301,10 @@ export default function App() {
             items={lista.items}
             quitar={lista.quitar}
             vaciar={lista.vaciar}
+            cambiarPrecio={lista.cambiarPrecio}
+            redondear={lista.redondear}
+            deshacerRedondeo={lista.deshacerRedondeo}
+            hayRedondeo={lista.hayRedondeo}
             descuento={lista.descuento}
             setDescuento={lista.setDescuento}
             subtotal={lista.subtotal}
@@ -406,10 +416,7 @@ export default function App() {
         )}
       </main>
 
-      <footer className="border-t border-[var(--color-border)] px-4 py-4 text-center text-xs text-[var(--color-muted)]">
-        Precios de referencia vía TCGPlayer y YGOPRODeck · cotización vía
-        dolarapi.com. Valores orientativos.
-      </footer>
+      <Footer />
 
       <ModalPrecio
         abierto={modalAbierto}

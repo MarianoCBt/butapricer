@@ -14,6 +14,11 @@ export const config = {
   currency: 'ARS',
   locale: 'es-AR',
 
+  // Redes (las mismas que la tienda: marianocbt.github.io/butatcg)
+  instagramUrl: 'https://www.instagram.com/butatcg/',
+  instagramUser: '@butatcg',
+  tiendaUrl: 'https://marianocbt.github.io/butatcg/',
+
   // Casa de dólar usada por defecto para convertir a ARS.
   casaDolarPorDefecto: 'blue',
 

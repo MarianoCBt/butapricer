@@ -153,7 +153,7 @@ export default function ModalPrecio({
         <div className="border-b border-[var(--color-border)] p-4">
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-sm text-[var(--color-muted)]">Market Price</span>
-            <span className="tabular font-semibold text-[var(--color-ink)]">
+            <span className="tabular font-semibold text-[var(--color-usd)]">
               {producto?.market > 0 ? moneda(producto.market) : '—'}
             </span>
           </div>
@@ -172,7 +172,7 @@ export default function ModalPrecio({
                     {fechaCorta(v.fecha)} ·{' '}
                     {CONDICIONES[v.condicion] || v.condicion || '—'}
                   </span>
-                  <span className="tabular shrink-0 text-[var(--color-ink)]">
+                  <span className="tabular shrink-0 font-medium text-[var(--color-usd)]">
                     {moneda(v.precio)}
                   </span>
                 </li>
