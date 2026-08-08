@@ -47,12 +47,14 @@ navegador no puede falsificar ese header, así que el pedido tiene que salir de
 un servidor.
 
 - **En desarrollo** lo resuelve el proxy de `vite.config.js`. No hay que
-  configurar nada.
-- **Publicado** hace falta un proxy propio (por ejemplo un Cloudflare Worker) y
-  poner su URL en `tcgplayer.proxyBase` dentro de `src/config.js`. **Ese proxy
-  no está en este repo.**
+  configurar nada: `npm run dev` y andan los precios.
+- **Publicado** se usa un proxy propio (un Cloudflare Worker), cuya URL está en
+  `tcgplayer.proxyBase` dentro de `src/config.js`. **El código de ese proxy no
+  está en este repo**, y sólo acepta pedidos desde los dominios de este
+  proyecto.
 
-Sin proxy la app no se rompe: busca la carta, lista sus impresiones y avisa que
+Si clonás el repo, en desarrollo funciona igual. Y si algún día el proxy no
+responde, la app no se rompe: busca la carta, lista sus impresiones y avisa que
 los precios en vivo no están disponibles.
 
 ## Stack

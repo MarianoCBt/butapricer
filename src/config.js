@@ -46,7 +46,12 @@ export const config = {
   //  ventas ni precios por rareza, y avisa por qué.
   // -------------------------------------------------------------------
   tcgplayer: {
-    proxyBase: '',
+    // En DEV va vacío: el mismo origen, que atiende el proxy de Vite. Así el
+    // trabajo diario no consume la cuota del Worker (ni la de nadie que
+    // clone el repo). Publicado sí se usa el Worker.
+    proxyBase: import.meta.env.PROD
+      ? 'https://butapricer-tcg.butatcg.workers.dev'
+      : '',
     ventasVisibles: 12,
   },
 }
